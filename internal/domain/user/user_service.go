@@ -8,4 +8,5 @@ type UserService interface {
 	GetByUsername(username string) (*User, error)
 	Update(user *User) error
 	Delete(id any) error
+	ListAll() (Users, error)
 }

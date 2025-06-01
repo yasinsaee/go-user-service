@@ -61,3 +61,7 @@ func (s *userService) Update(user *user.User) error {
 func (s *userService) Delete(id any) error {
 	return s.repo.Delete(id)
 }
+
+func (s *userService) ListAll() (user.Users, error) {
+	return s.repo.List()
+}

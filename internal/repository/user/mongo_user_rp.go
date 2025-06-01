@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/yasinsaee/go-user-service/internal/domain/user"
+	"github.com/yasinsaee/go-user-service/pkg/logger"
 	mongo2 "github.com/yasinsaee/go-user-service/pkg/mongo"
 	"github.com/yasinsaee/go-user-service/pkg/util"
 	"go.mongodb.org/mongo-driver/bson"
@@ -56,4 +57,15 @@ func (r *mongoUserRepository) Delete(id any) error {
 		return err
 	}
 	return mongo2.RemoveOne(r.collection.Name(), bson.M{"_id": objID})
+}
+
+func (r *mongoUserRepository) List() (user.Users, error) {
+	users := make(user.Users, 0)
+	err := mongo2.Find(r.collection.Name(), bson.M{}, &users)
+	if err != nil {
+		logger.Error("error while fetching users: ", err.Error())
+		return nil, err
+	}
+
+	return users, nil
 }

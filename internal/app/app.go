@@ -16,7 +16,7 @@ func StartApp() {
 
 	e := echo.New()
 
-	InitRoutes(e)
+	Register(e)
 
 	port := config.GetEnv("PORT", "8080")
 	fmt.Println("✅ Server running on port:", port)

@@ -21,3 +21,5 @@ type User struct {
 	UpdatedAt    time.Time            `bson:"updated_at" json:"updated_at"`
 	LastLogin    *time.Time           `bson:"last_login,omitempty" json:"last_login,omitempty"`
 }
+
+type Users []User
