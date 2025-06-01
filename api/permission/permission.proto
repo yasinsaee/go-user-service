@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package permission;
+
+option go_package = "github.com/yasinsaee/go-user-service/api/permissionpb";
+
+message Permission {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message GetPermissionRequest {
+  string id = 1;
+}
+
+message GetPermissionResponse {
+  Permission permission = 1;
+}
+
+message CreatePermissionRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message CreatePermissionResponse {
+  Permission permission = 1;
+}
+
+message ListPermissionsRequest {}
+
+message ListPermissionsResponse {
+  repeated Permission permissions = 1;
+}
+
+service PermissionService {
+  rpc GetPermission(GetPermissionRequest) returns (GetPermissionResponse);
+  rpc CreatePermission(CreatePermissionRequest) returns (CreatePermissionResponse);
+  rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
+}

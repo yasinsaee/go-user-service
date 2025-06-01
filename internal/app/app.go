@@ -14,6 +14,8 @@ func StartApp() {
 
 	InitJWT()
 
+	go StartGRPCServer()
+	
 	e := echo.New()
 
 	Register(e)
