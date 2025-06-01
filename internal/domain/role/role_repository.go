@@ -6,5 +6,5 @@ type RoleRepository interface {
 	FindByName(name string) (*Role, error)
 	Update(role *Role) error
 	Delete(id any) error
-	List() ([]*Role, error)
+	List() (Roles, error)
 }
