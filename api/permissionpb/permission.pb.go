@@ -581,7 +581,7 @@ const file_permission_permission_proto_rawDesc = "" +
 	"\x10CreatePermission\x12#.permission.CreatePermissionRequest\x1a$.permission.CreatePermissionResponse\x12Z\n" +
 	"\x0fListPermissions\x12\".permission.ListPermissionsRequest\x1a#.permission.ListPermissionsResponse\x12]\n" +
 	"\x10UpdatePermission\x12#.permission.UpdatePermissionRequest\x1a$.permission.UpdatePermissionResponse\x12]\n" +
-	"\x10DeletePermission\x12#.permission.DeletePermissionRequest\x1a$.permission.DeletePermissionResponseB7Z5github.com/yasinsaee/go-user-service/api/permissionpbb\x06proto3"
+	"\x10DeletePermission\x12#.permission.DeletePermissionRequest\x1a$.permission.DeletePermissionResponseB\x0fZ\r/permissionpbb\x06proto3"
 
 var (
 	file_permission_permission_proto_rawDescOnce sync.Once

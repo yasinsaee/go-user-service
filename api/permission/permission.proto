@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package permission;
 
-option go_package = "github.com/yasinsaee/go-user-service/api/permissionpb";
+option go_package = "/permissionpb";
 
 message Permission {
   string id = 1;
