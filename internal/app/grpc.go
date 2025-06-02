@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/yasinsaee/go-user-service/api/github.com/yasinsaee/go-user-service/api/permissionpb"
+	"github.com/yasinsaee/go-user-service/api/permissionpb"
 	permissiongrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/permission"
 	repository_permission "github.com/yasinsaee/go-user-service/internal/repository/permission"
 	"github.com/yasinsaee/go-user-service/internal/service/permission"

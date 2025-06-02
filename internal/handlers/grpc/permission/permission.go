@@ -3,7 +3,7 @@ package permissiongrpc
 import (
 	"context"
 
-	"github.com/yasinsaee/go-user-service/api/github.com/yasinsaee/go-user-service/api/permissionpb"
+	"github.com/yasinsaee/go-user-service/api/permissionpb"
 	"github.com/yasinsaee/go-user-service/internal/domain/permission"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
@@ -111,12 +111,17 @@ func (h *Handler) ListPermissions(ctx context.Context, req *permissionpb.ListPer
 }
 
 func (h *Handler) DeletePermission(ctx context.Context, req *permissionpb.DeletePermissionRequest) (*permissionpb.DeletePermissionResponse, error) {
-	err := h.service.Delete(req.GetId())
+	id, err := primitive.ObjectIDFromHex(req.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid id format")
+	}
+
+	err = h.service.Delete(id)
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "permission not found: %v", err)
 	}
 
 	return &permissionpb.DeletePermissionResponse{
-		Message: "success",
+		Message: "ok",
 	}, nil
 }
