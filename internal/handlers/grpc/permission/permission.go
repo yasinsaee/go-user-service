@@ -111,12 +111,7 @@ func (h *Handler) ListPermissions(ctx context.Context, req *permissionpb.ListPer
 }
 
 func (h *Handler) DeletePermission(ctx context.Context, req *permissionpb.DeletePermissionRequest) (*permissionpb.DeletePermissionResponse, error) {
-	id, err := primitive.ObjectIDFromHex(req.GetId())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid id format")
-	}
-
-	err = h.service.Delete(id)
+	err := h.service.Delete(req.GetId())
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "permission not found: %v", err)
 	}
