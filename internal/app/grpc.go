@@ -4,6 +4,11 @@ import (
 	"log"
 	"net"
 
+	"github.com/yasinsaee/go-user-service/api/github.com/yasinsaee/go-user-service/api/permissionpb"
+	permissiongrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/permission"
+	repository_permission "github.com/yasinsaee/go-user-service/internal/repository/permission"
+	"github.com/yasinsaee/go-user-service/internal/service/permission"
+	"github.com/yasinsaee/go-user-service/pkg/mongo"
 	"google.golang.org/grpc"
 )
 
@@ -14,7 +19,14 @@ func StartGRPCServer() {
 	}
 
 	s := grpc.NewServer()
-	// handler := &permissionHandler.Handler{}
+
+	permissionRepo := repository_permission.NewMongoPermissionRepository(mongo.DB.Database, "permission")
+
+	permissionService := permission.NewPermissionService(permissionRepo)
+
+	permissionHandler := permissiongrpc.New(permissionService)
+
+	permissionpb.RegisterPermissionServiceServer(s, permissionHandler)
 
 	log.Println("gRPC server is running on port 50051")
 	if err := s.Serve(lis); err != nil {
