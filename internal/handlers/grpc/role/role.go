@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/yasinsaee/go-user-service/api/rolepb"
+	"github.com/yasinsaee/go-user-service/internal/domain/permission"
 	"github.com/yasinsaee/go-user-service/internal/domain/role"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
@@ -12,12 +13,49 @@ import (
 
 type Handler struct {
 	rolepb.UnimplementedRoleServiceServer
-	service role.RoleService
+	service    role.RoleService
+	perService permission.PermissionService
 }
 
-func New(service role.RoleService) *Handler {
-	return &Handler{service: service}
+func New(service role.RoleService, perService permission.PermissionService) *Handler {
+	return &Handler{service: service, perService: perService}
 }
+
+// -- #start helper
+func toPermissionPB(p *permission.Permission) *rolepb.Permission {
+	return &rolepb.Permission{
+		Id:          p.ID.Hex(),
+		Name:        p.Name,
+		Description: p.Description,
+	}
+}
+
+func (h *Handler) getPermissionsFromIDs(ids []primitive.ObjectID) ([]*rolepb.Permission, error) {
+	var permProtos []*rolepb.Permission
+	for _, id := range ids {
+		p, err := h.perService.GetByID(id)
+		if err != nil {
+			return nil, err
+		}
+		permProtos = append(permProtos, toPermissionPB(p))
+	}
+	return permProtos, nil
+}
+
+func (h *Handler) toRolePB(r *role.Role) (*rolepb.Role, error) {
+	perms, err := h.getPermissionsFromIDs(r.Permissions)
+	if err != nil {
+		return nil, err
+	}
+	return &rolepb.Role{
+		Id:          r.ID.Hex(),
+		Name:        r.Name,
+		Description: r.Description,
+		Permissions: perms,
+	}, nil
+}
+
+//-- #end helper
 
 func (h *Handler) CreateRole(ctx context.Context, req *rolepb.CreateRoleRequest) (*rolepb.CreateRoleResponse, error) {
 	r := &role.Role{
@@ -26,13 +64,11 @@ func (h *Handler) CreateRole(ctx context.Context, req *rolepb.CreateRoleRequest)
 	}
 
 	for _, v := range req.GetPermissions() {
-		id, _ := primitive.ObjectIDFromHex(v)
+		id, err := primitive.ObjectIDFromHex(v)
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid permission id: %v", err)
+		}
 		r.Permissions = append(r.Permissions, id)
-	}
-
-	perms := make([]string, len(r.Permissions))
-	for i, id := range r.Permissions {
-		perms[i] = id.Hex()
 	}
 
 	err := h.service.Create(r)
@@ -40,13 +76,13 @@ func (h *Handler) CreateRole(ctx context.Context, req *rolepb.CreateRoleRequest)
 		return nil, status.Errorf(codes.Internal, "failed to create role: %v", err)
 	}
 
+	rolePB, err := h.toRolePB(r)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to map role: %v", err)
+	}
+
 	return &rolepb.CreateRoleResponse{
-		Role: &rolepb.Role{
-			Id:          r.ID.Hex(),
-			Name:        r.Name,
-			Description: r.Description,
-			Permissions: perms,
-		},
+		Role: rolePB,
 	}, nil
 }
 
@@ -68,29 +104,26 @@ func (h *Handler) UpdateRole(ctx context.Context, req *rolepb.UpdateRoleRequest)
 		rol.Description = desc
 	}
 	if len(req.Permissions) > 0 {
+		rol.Permissions = make([]primitive.ObjectID, 0, len(req.Permissions))
 		for _, v := range req.GetPermissions() {
-			id, _ := primitive.ObjectIDFromHex(v)
+			id, err := primitive.ObjectIDFromHex(v)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "invalid permission id: %v", err)
+			}
 			rol.Permissions = append(rol.Permissions, id)
 		}
-	}
-
-	perms := make([]string, len(rol.Permissions))
-	for i, id := range rol.Permissions {
-		perms[i] = id.Hex()
 	}
 
 	if err := h.service.Update(rol); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update role: %v", err)
 	}
 
-	return &rolepb.UpdateRoleResponse{
-		Role: &rolepb.Role{
-			Id:          rol.ID.Hex(),
-			Name:        rol.Name,
-			Description: rol.Description,
-			Permissions: perms,
-		},
-	}, nil
+	rolePB, err := h.toRolePB(rol)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to map role: %v", err)
+	}
+
+	return &rolepb.UpdateRoleResponse{Role: rolePB}, nil
 }
 
 func (h *Handler) GetRole(ctx context.Context, req *rolepb.GetRoleRequest) (*rolepb.GetRoleResponse, error) {
@@ -104,19 +137,12 @@ func (h *Handler) GetRole(ctx context.Context, req *rolepb.GetRoleRequest) (*rol
 		return nil, status.Errorf(codes.NotFound, "role not found: %v", err)
 	}
 
-	perms := make([]string, len(r.Permissions))
-	for i, id := range r.Permissions {
-		perms[i] = id.Hex()
+	rolePB, err := h.toRolePB(r)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to map role: %v", err)
 	}
 
-	return &rolepb.GetRoleResponse{
-		Role: &rolepb.Role{
-			Id:          r.ID.Hex(),
-			Name:        r.Name,
-			Description: r.Description,
-			Permissions: perms,
-		},
-	}, nil
+	return &rolepb.GetRoleResponse{Role: rolePB}, nil
 }
 
 func (h *Handler) ListRoles(ctx context.Context, req *rolepb.ListRoleRequest) (*rolepb.ListRoleResponse, error) {
@@ -127,21 +153,14 @@ func (h *Handler) ListRoles(ctx context.Context, req *rolepb.ListRoleRequest) (*
 
 	var pbRoles []*rolepb.Role
 	for _, r := range roles {
-		perms := make([]string, len(r.Permissions))
-		for i, id := range r.Permissions {
-			perms[i] = id.Hex()
+		rolePB, err := h.toRolePB(&r)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to map role: %v", err)
 		}
-		pbRoles = append(pbRoles, &rolepb.Role{
-			Id:          r.ID.Hex(),
-			Name:        r.Name,
-			Description: r.Description,
-			Permissions: perms,
-		})
+		pbRoles = append(pbRoles, rolePB)
 	}
 
-	return &rolepb.ListRoleResponse{
-		Roles: pbRoles,
-	}, nil
+	return &rolepb.ListRoleResponse{Roles: pbRoles}, nil
 }
 
 func (h *Handler) DeleteRole(ctx context.Context, req *rolepb.DeleteRoleRequest) (*rolepb.DeleteRoleResponse, error) {
@@ -150,7 +169,5 @@ func (h *Handler) DeleteRole(ctx context.Context, req *rolepb.DeleteRoleRequest)
 		return nil, status.Errorf(codes.NotFound, "role not found: %v", err)
 	}
 
-	return &rolepb.DeleteRoleResponse{
-		Message: "ok",
-	}, nil
+	return &rolepb.DeleteRoleResponse{Message: "ok"}, nil
 }

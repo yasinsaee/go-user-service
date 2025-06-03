@@ -4,11 +4,17 @@ package role;
 
 option go_package = "/rolepb";
 
+message Permission {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
 message Role {
   string id = 1;
   string name = 2;
   string description = 3;
-  repeated string permissions = 4;
+  repeated Permission permissions = 4;
 }
 
 message GetRoleRequest {

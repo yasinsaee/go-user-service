@@ -34,11 +34,11 @@ func StartGRPCServer() {
 
 	//handlers
 	permissionHandler := permissiongrpc.New(permissionService)
-	roleHandler := rolegrpc.New(roleService)
+	roleHandler := rolegrpc.New(roleService, permissionService)
 
 	//register grpc services
 	permissionpb.RegisterPermissionServiceServer(s, permissionHandler)
-	rolepb.RegisterRoleServiceServer(s, roleHandler )
+	rolepb.RegisterRoleServiceServer(s, roleHandler)
 
 	log.Println("gRPC server is running on port 50051")
 	if err := s.Serve(lis); err != nil {
