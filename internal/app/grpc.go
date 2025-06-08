@@ -10,6 +10,7 @@ import (
 	permissiongrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/permission"
 	rolegrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/role"
 	usergrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/user"
+	"github.com/yasinsaee/go-user-service/internal/middleware"
 	repository_permission "github.com/yasinsaee/go-user-service/internal/repository/permission"
 	repository_role "github.com/yasinsaee/go-user-service/internal/repository/role"
 	repository_user "github.com/yasinsaee/go-user-service/internal/repository/user"
@@ -26,7 +27,7 @@ func StartGRPCServer() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(middleware.AuthInterceptor()))
 
 	//repos
 	permissionRepo := repository_permission.NewMongoPermissionRepository(mongo.DB.Database, "permission")

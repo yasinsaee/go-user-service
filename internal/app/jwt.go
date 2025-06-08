@@ -23,8 +23,8 @@ func InitJWT() {
 		logger.Error("youre expire date jwt is not ok")
 	}
 	jwt.Init(jwt.JWTConfig{
-		PrivateKey: loadKey("keys/private.key"),
-		PublicKey:  loadKey("keys/public.key"),
+		PrivateKey: loadKey("private.key"),
+		PublicKey:  loadKey("public.key"),
 		Exp:        exp,
 	})
 }

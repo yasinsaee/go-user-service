@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"crypto/rsa"
 	"errors"
 	"strings"
 	"time"
@@ -18,10 +19,10 @@ var (
 type (
 	// JWTClaims is a struct that will be encoded to a JWT.
 	JWTClaims struct {
-		ID       string `json:"id"`
-		Username string `json:"username"`
-		Role     string `json:"role"`
-		Access   string `json:"access"`
+		ID       string   `json:"id"`
+		Username string   `json:"username"`
+		Roles    []string `json:"roles"`
+		Access   []string `json:"access"`
 		jwt.StandardClaims
 	}
 
@@ -57,6 +58,8 @@ func (t *TokenConfig) generateToken(expirationTime time.Time, privateKey []byte)
 	claims := &JWTClaims{
 		ID:       t.ID,
 		Username: t.Username,
+		Roles:    t.Roles,
+		Access:   t.Access,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -105,4 +108,8 @@ func validation(token string) (*JWTClaims, error) {
 	}
 
 	return claims, nil
+}
+
+func GetPublicKey() (*rsa.PublicKey, error) {
+	return jwt.ParseRSAPublicKeyFromPEM(conf.PublicKey)
 }
