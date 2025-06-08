@@ -26,8 +26,9 @@ type (
 	}
 
 	JWTConfig struct {
-		Secret string
-		Exp    int
+		PrivateKey []byte
+		PublicKey  []byte
+		Exp        int
 	}
 
 	TokenConfig struct {
@@ -49,26 +50,29 @@ func Init(config JWTConfig) {
 func (t *TokenConfig) GenerateAccessToken() (string, time.Time, error) {
 	// Declare the expiration time of the token - ? hours.
 	expirationTime := time.Now().Add(time.Hour * time.Duration(conf.Exp))
-	return t.generateToken(expirationTime, []byte(conf.Secret))
+	return t.generateToken(expirationTime, []byte(conf.PrivateKey))
 }
 
-func (t *TokenConfig) generateToken(expirationTime time.Time, secret []byte) (string, time.Time, error) {
-	// Create the JWT claims, which includes the username and expiry time.
+func (t *TokenConfig) generateToken(expirationTime time.Time, privateKey []byte) (string, time.Time, error) {
 	claims := &JWTClaims{
 		ID:       t.ID,
 		Username: t.Username,
 		StandardClaims: jwt.StandardClaims{
-			// In JWT, the expiry time is expressed as unix milliseconds.
 			ExpiresAt: expirationTime.Unix(),
 		},
 	}
-	// Declare the token with the HS256 algorithm used for signing, and the claims.
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// Create the JWT string.
-	tokenString, err := token.SignedString(secret)
+
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(privateKey)
 	if err != nil {
 		return "", time.Now(), err
 	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	tokenString, err := token.SignedString(key)
+	if err != nil {
+		return "", time.Now(), err
+	}
+
 	return tokenString, expirationTime, nil
 }
 
@@ -81,19 +85,21 @@ func CurrentToken(c *echo.Context) (*JWTClaims, error) {
 }
 
 func validation(token string) (*JWTClaims, error) {
-	// Initialize a new instance of `Claims`
 	token = strings.TrimPrefix(token, "Bearer ")
-
 	claims := &JWTClaims{}
 
-	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(conf.Secret), nil
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(conf.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return publicKey, nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// check expiration time
 	if claims.ExpiresAt < time.Now().Unix() {
 		return nil, ErrTokenExpired
 	}
