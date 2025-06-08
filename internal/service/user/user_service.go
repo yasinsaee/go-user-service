@@ -20,8 +20,8 @@ func NewUserService(repo user.UserRepository) user.UserService {
 }
 
 func (s *userService) Register(user *user.User) error {
-	existing, _ := s.repo.FindByUsername(user.Username)
-	if existing != nil {
+	_, err := s.repo.FindByUsername(user.Username)
+	if err == nil {
 		return errors.New("username already exists")
 	}
 
