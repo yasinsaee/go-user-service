@@ -19,7 +19,7 @@ type User struct {
 	IsActive     bool                 `bson:"is_active" json:"is_active"`
 	CreatedAt    time.Time            `bson:"created_at" json:"created_at"`
 	UpdatedAt    time.Time            `bson:"updated_at" json:"updated_at"`
-	LastLogin    *time.Time           `bson:"last_login,omitempty" json:"last_login,omitempty"`
+	LastLogin    time.Time            `bson:"last_login,omitempty" json:"last_login,omitempty"`
 }
 
 type Users []User

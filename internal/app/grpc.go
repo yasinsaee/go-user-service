@@ -41,7 +41,7 @@ func StartGRPCServer() {
 	//handlers
 	permissionHandler := permissiongrpc.New(permissionService)
 	roleHandler := rolegrpc.New(roleService, permissionService)
-	userHandler := usergrpc.New(userService, roleService)
+	userHandler := usergrpc.New(userService, roleService, permissionService)
 
 	//register grpc services
 	permissionpb.RegisterPermissionServiceServer(s, permissionHandler)

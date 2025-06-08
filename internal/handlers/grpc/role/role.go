@@ -21,7 +21,7 @@ func New(service role.RoleService, perService permission.PermissionService) *Han
 	return &Handler{service: service, perService: perService}
 }
 
-// -- #start helper
+// -- start helper
 func toPermissionPB(p *permission.Permission) *rolepb.Permission {
 	return &rolepb.Permission{
 		Id:          p.ID.Hex(),
@@ -55,7 +55,7 @@ func (h *Handler) toRolePB(r *role.Role) (*rolepb.Role, error) {
 	}, nil
 }
 
-//-- #end helper
+//-- end helper
 
 func (h *Handler) CreateRole(ctx context.Context, req *rolepb.CreateRoleRequest) (*rolepb.CreateRoleResponse, error) {
 	r := &role.Role{

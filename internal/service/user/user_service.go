@@ -41,6 +41,10 @@ func (s *userService) Login(username, password string) (*user.User, error) {
 	if !util.CheckPasswordHash(password, user.Password) {
 		return nil, errors.New("invalid username or password")
 	}
+	user.LastLogin = time.Now()
+	if err = s.Update(user); err != nil {
+		return nil, errors.New("update missing")
+	}
 
 	return user, nil
 }
