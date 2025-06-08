@@ -2,11 +2,13 @@ package usergrpc
 
 import (
 	"context"
+	"sync"
 
 	"github.com/yasinsaee/go-user-service/api/userpb"
 	"github.com/yasinsaee/go-user-service/internal/domain/permission"
 	"github.com/yasinsaee/go-user-service/internal/domain/role"
 	"github.com/yasinsaee/go-user-service/internal/domain/user"
+	"github.com/yasinsaee/go-user-service/pkg/jwt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,16 +17,25 @@ import (
 
 type Handler struct {
 	userpb.UnimplementedUserServiceServer
-	service  user.UserService
-	rService role.RoleService
-	pService permission.PermissionService
+	service    user.UserService
+	rService   role.RoleService
+	pService   permission.PermissionService
+	roleCache  map[string]*role.Role
+	permCache  map[string]*permission.Permission
+	cacheMutex sync.RWMutex
 }
 
 func New(service user.UserService, rService role.RoleService, pService permission.PermissionService) *Handler {
-	return &Handler{service: service, rService: rService, pService: pService}
+	return &Handler{
+		service:   service,
+		rService:  rService,
+		pService:  pService,
+		roleCache: make(map[string]*role.Role),
+		permCache: make(map[string]*permission.Permission),
+	}
 }
 
-// -- #start helper
+// -- #start helpers
 
 func toPermissionPB(p *permission.Permission) *userpb.Permission {
 	return &userpb.Permission{
@@ -34,16 +45,60 @@ func toPermissionPB(p *permission.Permission) *userpb.Permission {
 	}
 }
 
+func (h *Handler) getPermissionByID(id primitive.ObjectID) (*permission.Permission, error) {
+	idStr := id.Hex()
+
+	h.cacheMutex.RLock()
+	if p, ok := h.permCache[idStr]; ok {
+		h.cacheMutex.RUnlock()
+		return p, nil
+	}
+	h.cacheMutex.RUnlock()
+
+	p, err := h.pService.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	h.cacheMutex.Lock()
+	h.permCache[idStr] = p
+	h.cacheMutex.Unlock()
+
+	return p, nil
+}
+
+func (h *Handler) getRoleByID(id primitive.ObjectID) (*role.Role, error) {
+	idStr := id.Hex()
+
+	h.cacheMutex.RLock()
+	if r, ok := h.roleCache[idStr]; ok {
+		h.cacheMutex.RUnlock()
+		return r, nil
+	}
+	h.cacheMutex.RUnlock()
+
+	r, err := h.rService.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	h.cacheMutex.Lock()
+	h.roleCache[idStr] = r
+	h.cacheMutex.Unlock()
+
+	return r, nil
+}
+
 func (h *Handler) getPermissionsFromIDs(ids []primitive.ObjectID) ([]*userpb.Permission, error) {
-	var permProtos []*userpb.Permission
+	var perms []*userpb.Permission
 	for _, id := range ids {
-		p, err := h.pService.GetByID(id)
+		p, err := h.getPermissionByID(id)
 		if err != nil {
 			return nil, err
 		}
-		permProtos = append(permProtos, toPermissionPB(p))
+		perms = append(perms, toPermissionPB(p))
 	}
-	return permProtos, nil
+	return perms, nil
 }
 
 func (h *Handler) toRolePb(r *role.Role) *userpb.Role {
@@ -60,18 +115,18 @@ func (h *Handler) toRolePb(r *role.Role) *userpb.Role {
 }
 
 func (h *Handler) getRoleFromIDs(ids []primitive.ObjectID) ([]*userpb.Role, error) {
-	var rolePr []*userpb.Role
+	var roles []*userpb.Role
 	for _, id := range ids {
-		r, err := h.rService.GetByID(id)
+		r, err := h.getRoleByID(id)
 		if err != nil {
 			return nil, err
 		}
-		rolePr = append(rolePr, h.toRolePb(r))
+		roles = append(roles, h.toRolePb(r))
 	}
-	return rolePr, nil
+	return roles, nil
 }
 
-func (h *Handler) toUserBp(u *user.User) *userpb.User {
+func (h *Handler) toUserPb(u *user.User) *userpb.User {
 	rolePb, _ := h.getRoleFromIDs(u.Roles)
 
 	return &userpb.User{
@@ -89,28 +144,45 @@ func (h *Handler) toUserBp(u *user.User) *userpb.User {
 	}
 }
 
-//-- end helper
+func (h *Handler) toUserJwtMeta(u *user.User) (roles []string, permissions []string) {
+	rolePbs, _ := h.getRoleFromIDs(u.Roles)
+	for _, r := range rolePbs {
+		roles = append(roles, r.Id)
+		for _, p := range r.Permissions {
+			permissions = append(permissions, p.Id)
+		}
+	}
+	return
+}
+
+//-- end helpers
 
 func (h *Handler) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.LoginResponse, error) {
-	var (
-		err error
-	)
-
-	u := new(user.User)
-	u, err = h.service.Login(req.GetUsername(), req.GetPassword())
-
+	u, err := h.service.Login(req.GetUsername(), req.GetPassword())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to login user: %v", err)
 	}
 
-	return &userpb.LoginResponse{User: h.toUserBp(u)}, nil
+	roles, permissions := h.toUserJwtMeta(u)
+
+	tokenConfig := jwt.TokenConfig{
+		ID:       u.ID.Hex(),
+		Username: u.Username,
+		Roles:    roles,
+		Access:   permissions,
+	}
+	accessToken, _, err := tokenConfig.GenerateAccessToken()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to generate token: %v", err)
+	}
+
+	return &userpb.LoginResponse{
+		User:        h.toUserPb(u),
+		AccessToken: accessToken,
+	}, nil
 }
 
 func (h *Handler) Register(ctx context.Context, req *userpb.RegisterUser) (*userpb.UserResponse, error) {
-	var (
-		err error
-	)
-
 	u := &user.User{
 		FirstName:    req.GetFirstName(),
 		LastName:     req.GetLastName(),
@@ -122,21 +194,22 @@ func (h *Handler) Register(ctx context.Context, req *userpb.RegisterUser) (*user
 	}
 
 	for _, r := range req.GetRoles() {
-		role, err := h.rService.GetByID(r)
+		roleID, err := primitive.ObjectIDFromHex(r)
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid role ID: %v", err)
+		}
+		role, err := h.getRoleByID(roleID)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to find role: %v", err)
 		}
 		u.Roles = append(u.Roles, role.ID)
 	}
 
-	err = h.service.Register(u)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to login error: %v", err)
-
+	if err := h.service.Register(u); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to register user: %v", err)
 	}
 
 	return &userpb.UserResponse{
-		User: h.toUserBp(u),
+		User: h.toUserPb(u),
 	}, nil
 }

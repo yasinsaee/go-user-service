@@ -33,7 +33,7 @@ type (
 	TokenConfig struct {
 		ID       string   `json:"id"`
 		Username string   `json:"username"`
-		Role     string   `json:"role"`
+		Roles    []string `json:"roles"`
 		Access   []string `json:"access"`
 	}
 )
