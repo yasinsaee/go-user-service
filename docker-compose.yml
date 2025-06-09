@@ -1,0 +1,27 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  user-service:
+    build: .
+    container_name: user-service
+    depends_on:
+      - mongo
+    environment:
+      - PRIVATE_KEY_PATH=/app/keys/private.key
+      - PUBLIC_KEY_PATH=/app/keys/public.key
+      - MONGO_URI=mongodb://mongo:27017
+    volumes:
+      - ./cmd/.env:/app/.env
+      - ${PRIVATE_KEY_FILE}:/app/keys/private.key
+      - ${PUBLIC_KEY_FILE}:/app/keys/public.key
+    ports:
+      - "50051:50051"
+
+volumes:
+  mongo_data:
