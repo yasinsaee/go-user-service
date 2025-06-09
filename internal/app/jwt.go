@@ -10,6 +10,7 @@ import (
 )
 
 func loadKey(path string) []byte {
+
 	data, err := os.ReadFile(path)
 	if err != nil {
 		panic("cannot read key file: " + err.Error())
@@ -23,8 +24,8 @@ func InitJWT() {
 		logger.Error("youre expire date jwt is not ok")
 	}
 	jwt.Init(jwt.JWTConfig{
-		PrivateKey: loadKey("private.key"),
-		PublicKey:  loadKey("public.key"),
+		PrivateKey: loadKey(config.GetEnv("PRIVATE_KEY_PATH", "../keys/private.key")),
+		PublicKey:  loadKey(config.GetEnv("PUBLIC_KEY_PATH", "../keys/public.key")),
 		Exp:        exp,
 	})
 }
