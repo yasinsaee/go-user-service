@@ -4,9 +4,6 @@ import (
 	"log"
 	"net"
 
-	"github.com/yasinsaee/go-user-service/api/permissionpb"
-	"github.com/yasinsaee/go-user-service/api/rolepb"
-	"github.com/yasinsaee/go-user-service/api/userpb"
 	permissiongrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/permission"
 	rolegrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/role"
 	usergrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/user"
@@ -18,6 +15,9 @@ import (
 	"github.com/yasinsaee/go-user-service/internal/service/role"
 	"github.com/yasinsaee/go-user-service/internal/service/user"
 	"github.com/yasinsaee/go-user-service/pkg/mongo"
+	permissionpb "github.com/yasinsaee/go-user-service/user-service/permission"
+	rolepb "github.com/yasinsaee/go-user-service/user-service/role"
+	userpb "github.com/yasinsaee/go-user-service/user-service/user"
 	"google.golang.org/grpc"
 )
 

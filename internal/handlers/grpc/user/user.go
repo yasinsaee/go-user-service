@@ -4,11 +4,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/yasinsaee/go-user-service/api/userpb"
 	"github.com/yasinsaee/go-user-service/internal/domain/permission"
 	"github.com/yasinsaee/go-user-service/internal/domain/role"
 	"github.com/yasinsaee/go-user-service/internal/domain/user"
 	"github.com/yasinsaee/go-user-service/pkg/jwt"
+	userpb "github.com/yasinsaee/go-user-service/user-service/user"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/yasinsaee/go-user-service/internal/domain/permission"
-	"github.com/yasinsaee/go-user-service/user-service/permissionpb"
+	permissionpb "github.com/yasinsaee/go-user-service/user-service/permission"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

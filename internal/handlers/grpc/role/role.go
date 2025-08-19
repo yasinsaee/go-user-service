@@ -3,9 +3,9 @@ package rolegrpc
 import (
 	"context"
 
-	"github.com/yasinsaee/go-user-service/api/rolepb"
 	"github.com/yasinsaee/go-user-service/internal/domain/permission"
 	"github.com/yasinsaee/go-user-service/internal/domain/role"
+	rolepb "github.com/yasinsaee/go-user-service/user-service/role"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
