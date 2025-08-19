@@ -3,8 +3,8 @@ package permissiongrpc
 import (
 	"context"
 
-	"github.com/yasinsaee/go-user-service/api/permissionpb"
 	"github.com/yasinsaee/go-user-service/internal/domain/permission"
+	"github.com/yasinsaee/go-user-service/user-service/permissionpb"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

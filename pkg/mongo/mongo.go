@@ -31,7 +31,7 @@ var (
 	DB            *MongoDB
 	DefaultConfig = Config{
 		URI:           "mongodb://localhost:27017",
-		DB:            "ptm",
+		DB:            "user_service",
 		Username:      "",
 		Password:      "",
 		AuthMechanism: "",
