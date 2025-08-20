@@ -18,8 +18,8 @@ services:
       - MONGO_URI=mongodb://mongo:27017
     volumes:
       - ./cmd/.env:/app/.env
-      - ${PRIVATE_KEY_FILE}:/app/keys/private.key
-      - ${PUBLIC_KEY_FILE}:/app/keys/public.key
+      - ./keys/private.key:/app/keys/private.key
+      - ./keys/public.key:/app/keys/public.key
     ports:
       - "50051:50051"
 

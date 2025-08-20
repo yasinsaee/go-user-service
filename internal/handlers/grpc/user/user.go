@@ -147,9 +147,9 @@ func (h *Handler) toUserPb(u *user.User) *userpb.User {
 func (h *Handler) toUserJwtMeta(u *user.User) (roles []string, permissions []string) {
 	rolePbs, _ := h.getRoleFromIDs(u.Roles)
 	for _, r := range rolePbs {
-		roles = append(roles, r.Id)
+		roles = append(roles, r.Name)
 		for _, p := range r.Permissions {
-			permissions = append(permissions, p.Id)
+			permissions = append(permissions, p.Name)
 		}
 	}
 	return
