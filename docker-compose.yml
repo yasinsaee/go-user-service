@@ -22,10 +22,9 @@ services:
       - PORT=50051
       - JWT_EXP=24
     ports:
-      - "${PORT}:${PORT}"
+      - 50051:50051
     volumes:
       - ./keys:/app/keys
-      - ./cmd/.env:/app/.env
 
 volumes:
   mongo_data:
