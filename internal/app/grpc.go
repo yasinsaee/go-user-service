@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/yasinsaee/go-user-service/internal/app/config"
 	permissiongrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/permission"
 	rolegrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/role"
 	usergrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/user"
@@ -21,7 +22,8 @@ import (
 )
 
 func StartGRPCServer() {
-	lis, err := net.Listen("tcp", ":50051")
+	port := config.GetEnv("PORT", "50051")
+	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

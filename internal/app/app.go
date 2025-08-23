@@ -1,9 +1,6 @@
 package app
 
 import (
-	"fmt"
-
-	"github.com/labstack/echo/v4"
 	"github.com/yasinsaee/go-user-service/internal/app/config"
 )
 
@@ -14,13 +11,13 @@ func StartApp() {
 
 	InitJWT()
 
-	go StartGRPCServer()
-	
-	e := echo.New()
+	StartGRPCServer()
 
-	Register(e)
+	// e := echo.New()
 
-	port := config.GetEnv("PORT", "8080")
-	fmt.Println("✅ Server running on port:", port)
-	e.Logger.Fatal(e.Start(":" + port))
+	// Register(e)
+
+	// port := config.GetEnv("PORT", "8080")
+	// fmt.Println("✅ Server running on port:", port)
+	// e.Logger.Fatal(e.Start(":" + port))
 }
