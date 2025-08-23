@@ -1,17 +1,4 @@
-<h1 align="center">Hi 👋, I'm Yasin Saeeniya</h1>
-<p align="center">
-  <img src="https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif" width="200"/>
-</p>
-
-<h3 align="center">Go & .NET Core Backend Developer | gRPC, JWT, MongoDB, Docker | 6+ years experience</h3>
-
-<p align="center"> 
-  <img src="https://komarev.com/ghpvc/?username=yasinsaee&label=Profile%20views&color=0e75b6&style=flat" alt="yasinsaee" /> 
-</p>
-
----
-
-## 🚀 go-user-service
+# 🚀 go-user-service
 
 A gRPC-based **User Service** built with Go, using MongoDB as database, supporting JWT with RSA keys, fully dockerized and ready for Docker Hub & Docker Compose usage.
 
@@ -36,3 +23,4 @@ A gRPC-based **User Service** built with Go, using MongoDB as database, supporti
 
 ```bash
 docker pull yasinsaeeniya/go-user-service:latest
+
