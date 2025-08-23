@@ -29,12 +29,18 @@ docker pull yasinsaeeniya/go-user-service:latest
 
 The repository already contains a ready-to-use `docker-compose.yml` file. You can download it directly from GitHub:
 
+#### Ubuntu / MacOS
 ```bash
-curl -O https://raw.githubusercontent.com/yasinsaee/go-user-service/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/yasinsaee/go-user-service/master/docker-compose.yml
+```
+#### Windows
+```bash
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/yasinsaee/go-user-service/master/docker-compose.yml" -OutFile "docker-compose.yml"
 ```
 
 ### Step 3: Start the services
 ```bash
 docker-compose up -d
 ```
+
 
