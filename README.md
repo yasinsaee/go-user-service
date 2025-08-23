@@ -43,4 +43,28 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/yasinsaee/go-user-serv
 docker-compose up -d
 ```
 
+### Step 4: Verify services
+
+Check if the containers are running:
+
+```bash
+docker-compose ps
+```
+
+---
+
+### 🎉 Congratulations  
+
+The **go-user-service** is now up and running on your system! 🚀  
+You can start sending **gRPC requests** to it and integrate it into your applications.  
+
+
+### 🔗 Useful Links  
+
+- [gRPC Quick Start](https://grpc.io/docs/languages/go/quickstart/)  
+- [MongoDB Documentation](https://www.mongodb.com/docs/)  
+- [Docker Hub – go-user-service](https://hub.docker.com/r/yasinsaeeniya/go-user-service)  
+- [Docker Compose Documentation](https://docs.docker.com/compose/)  
+
+
 
