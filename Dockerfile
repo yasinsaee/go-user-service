@@ -15,8 +15,19 @@ FROM alpine:latest
 
 WORKDIR /app
 
+RUN apk add --no-cache openssl bash
+
 COPY --from=builder /app/server /app/server
 
-RUN chmod +x /app/server
+RUN mkdir -p /app/keys && touch /app/.env
 
-ENTRYPOINT ["/app/server"]
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/server /app/entrypoint.sh
+
+ENV PRIVATE_KEY_PATH=/app/keys/private.key
+ENV PUBLIC_KEY_PATH=/app/keys/public.key
+ENV ENV_PATH=/app/.env
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+CMD ["/app/server"]
