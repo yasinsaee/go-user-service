@@ -9,7 +9,7 @@ import (
 type (
 	OTP struct {
 		ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-		UserID      primitive.ObjectID `bson:"user_id" json:"user_id"`
+		Receiver    string             `bson:"receiver" json:"receiver"`
 		Code        string             `bson:"code" json:"code"`
 		Description string             `bson:"description" json:"description"`
 		Used        bool               `bson:"used" json:"used"`

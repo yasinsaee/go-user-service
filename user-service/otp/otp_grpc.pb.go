@@ -31,12 +31,16 @@ const (
 // OTPServiceClient is the client API for OTPService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// OTP Service
 type OTPServiceClient interface {
+	// CRUD
 	CreateOTP(ctx context.Context, in *CreateOTPRequest, opts ...grpc.CallOption) (*CreateOTPResponse, error)
 	UpdateOTP(ctx context.Context, in *UpdateOTPRequest, opts ...grpc.CallOption) (*UpdateOTPResponse, error)
 	DeleteOTP(ctx context.Context, in *DeleteOTPRequest, opts ...grpc.CallOption) (*DeleteOTPResponse, error)
 	GetOTP(ctx context.Context, in *GetOTPRequest, opts ...grpc.CallOption) (*GetOTPResponse, error)
 	ListOTPs(ctx context.Context, in *ListOTPsRequest, opts ...grpc.CallOption) (*ListOTPsResponse, error)
+	// Business logic
 	RequestOTP(ctx context.Context, in *RequestOTPRequest, opts ...grpc.CallOption) (*RequestOTPResponse, error)
 	ValidateOTP(ctx context.Context, in *ValidateOTPRequest, opts ...grpc.CallOption) (*ValidateOTPResponse, error)
 }
@@ -122,12 +126,16 @@ func (c *oTPServiceClient) ValidateOTP(ctx context.Context, in *ValidateOTPReque
 // OTPServiceServer is the server API for OTPService service.
 // All implementations must embed UnimplementedOTPServiceServer
 // for forward compatibility.
+//
+// OTP Service
 type OTPServiceServer interface {
+	// CRUD
 	CreateOTP(context.Context, *CreateOTPRequest) (*CreateOTPResponse, error)
 	UpdateOTP(context.Context, *UpdateOTPRequest) (*UpdateOTPResponse, error)
 	DeleteOTP(context.Context, *DeleteOTPRequest) (*DeleteOTPResponse, error)
 	GetOTP(context.Context, *GetOTPRequest) (*GetOTPResponse, error)
 	ListOTPs(context.Context, *ListOTPsRequest) (*ListOTPsResponse, error)
+	// Business logic
 	RequestOTP(context.Context, *RequestOTPRequest) (*RequestOTPResponse, error)
 	ValidateOTP(context.Context, *ValidateOTPRequest) (*ValidateOTPResponse, error)
 	mustEmbedUnimplementedOTPServiceServer()

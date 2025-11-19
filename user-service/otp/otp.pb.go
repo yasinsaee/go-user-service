@@ -21,10 +21,11 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// OTP structure
 type OTP struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=userId,proto3" json:"userId,omitempty"`
+	Receiver      string                 `protobuf:"bytes,2,opt,name=receiver,proto3" json:"receiver,omitempty"` // شماره موبایل یا ایمیل
 	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
 	ExpiresAt     int64                  `protobuf:"varint,4,opt,name=expiresAt,proto3" json:"expiresAt,omitempty"`
 	Used          bool                   `protobuf:"varint,5,opt,name=used,proto3" json:"used,omitempty"`
@@ -69,9 +70,9 @@ func (x *OTP) GetId() string {
 	return ""
 }
 
-func (x *OTP) GetUserId() string {
+func (x *OTP) GetReceiver() string {
 	if x != nil {
-		return x.UserId
+		return x.Receiver
 	}
 	return ""
 }
@@ -97,9 +98,10 @@ func (x *OTP) GetUsed() bool {
 	return false
 }
 
+// CRUD
 type CreateOTPRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	Receiver      string                 `protobuf:"bytes,1,opt,name=receiver,proto3" json:"receiver,omitempty"`
 	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	TtlSeconds    int32                  `protobuf:"varint,3,opt,name=ttlSeconds,proto3" json:"ttlSeconds,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -136,9 +138,9 @@ func (*CreateOTPRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_otp_otp_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreateOTPRequest) GetUserId() string {
+func (x *CreateOTPRequest) GetReceiver() string {
 	if x != nil {
-		return x.UserId
+		return x.Receiver
 	}
 	return ""
 }
@@ -569,9 +571,10 @@ func (x *ListOTPsResponse) GetOtps() []*OTP {
 	return nil
 }
 
+// Business Logic (Request / Validate OTP)
 type RequestOTPRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Receiver      string                 `protobuf:"bytes,1,opt,name=receiver,proto3" json:"receiver,omitempty"`
+	Receiver      string                 `protobuf:"bytes,1,opt,name=receiver,proto3" json:"receiver,omitempty"` // شماره موبایل یا ایمیل
 	TtlSeconds    int32                  `protobuf:"varint,2,opt,name=ttlSeconds,proto3" json:"ttlSeconds,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -765,15 +768,15 @@ var File_user_service_otp_otp_proto protoreflect.FileDescriptor
 
 const file_user_service_otp_otp_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser-service/otp/otp.proto\x12\x03otp\"s\n" +
+	"\x1auser-service/otp/otp.proto\x12\x03otp\"w\n" +
 	"\x03OTP\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
-	"\x06userId\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
+	"\breceiver\x18\x02 \x01(\tR\breceiver\x12\x12\n" +
 	"\x04code\x18\x03 \x01(\tR\x04code\x12\x1c\n" +
 	"\texpiresAt\x18\x04 \x01(\x03R\texpiresAt\x12\x12\n" +
-	"\x04used\x18\x05 \x01(\bR\x04used\"^\n" +
-	"\x10CreateOTPRequest\x12\x16\n" +
-	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04used\x18\x05 \x01(\bR\x04used\"b\n" +
+	"\x10CreateOTPRequest\x12\x1a\n" +
+	"\breceiver\x18\x01 \x01(\tR\breceiver\x12\x12\n" +
 	"\x04code\x18\x02 \x01(\tR\x04code\x12\x1e\n" +
 	"\n" +
 	"ttlSeconds\x18\x03 \x01(\x05R\n" +
@@ -821,7 +824,7 @@ const file_user_service_otp_otp_proto_rawDesc = "" +
 	"\bListOTPs\x12\x14.otp.ListOTPsRequest\x1a\x15.otp.ListOTPsResponse\x12=\n" +
 	"\n" +
 	"RequestOTP\x12\x16.otp.RequestOTPRequest\x1a\x17.otp.RequestOTPResponse\x12@\n" +
-	"\vValidateOTP\x12\x17.otp.ValidateOTPRequest\x1a\x18.otp.ValidateOTPResponseB\bZ\x06/otppbb\x06proto3"
+	"\vValidateOTP\x12\x17.otp.ValidateOTPRequest\x1a\x18.otp.ValidateOTPResponseB,Z*github.com/yasinsaee/go-user-service/otppbb\x06proto3"
 
 var (
 	file_user_service_otp_otp_proto_rawDescOnce sync.Once

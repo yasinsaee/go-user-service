@@ -106,7 +106,6 @@ func (h *Handler) ListOTPs(ctx context.Context, req *otpPb.ListOTPsRequest) (*ot
 func (h *Handler) RequestOTP(ctx context.Context, req *otpPb.RequestOTPRequest) (*otpPb.RequestOTPResponse, error) {
 	receiver := req.GetReceiver()
 
-	// نرخ‌دهی
 	ok, err := h.service.CanSend(receiver)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "rate limit error: %v", err)
@@ -115,16 +114,13 @@ func (h *Handler) RequestOTP(ctx context.Context, req *otpPb.RequestOTPRequest) 
 		return nil, status.Error(codes.ResourceExhausted, "too many requests, wait before retrying")
 	}
 
-	// ایجاد کد
 	code := h.service.GenerateCode()
 
-	// ذخیره در DB
 	err = h.service.SaveCode(receiver, code, int(req.GetTtlSeconds()))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to save otp: %v", err)
 	}
 
-	// ارسال
 	if err := h.service.SendCode(receiver, code); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to send otp: %v", err)
 	}
@@ -156,7 +152,7 @@ func (h *Handler) ValidateOTP(ctx context.Context, req *otpPb.ValidateOTPRequest
 func toProto(o *otp.OTP) *otpPb.OTP {
 	return &otpPb.OTP{
 		Id:        o.ID.Hex(),
-		UserId:    o.UserID.Hex(),
+		Receiver:  o.Receiver,
 		Code:      o.Code,
 		ExpiresAt: o.ExpiresAt.Unix(),
 		Used:      o.Used,
