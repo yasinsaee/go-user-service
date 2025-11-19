@@ -29,12 +29,42 @@ docker pull yasinsaeeniya/go-user-service:latest
 
 The repository already contains a ready-to-use `docker-compose.yml` file. You can download it directly from GitHub:
 
+#### Ubuntu / MacOS
 ```bash
-curl -O https://raw.githubusercontent.com/yasinsaee/go-user-service/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/yasinsaee/go-user-service/master/docker-compose.yml
+```
+#### Windows
+```bash
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/yasinsaee/go-user-service/master/docker-compose.yml" -OutFile "docker-compose.yml"
 ```
 
 ### Step 3: Start the services
 ```bash
 docker-compose up -d
 ```
+
+### Step 4: Verify services
+
+Check if the containers are running:
+
+```bash
+docker-compose ps
+```
+
+---
+
+### 🎉 Congratulations  
+
+The **go-user-service** is now up and running on your system! 🚀  
+You can start sending **gRPC requests** to it and integrate it into your applications.  
+
+
+### 🔗 Useful Links  
+
+- [gRPC Quick Start](https://grpc.io/docs/languages/go/quickstart/)  
+- [MongoDB Documentation](https://www.mongodb.com/docs/)  
+- [Docker Hub – go-user-service](https://hub.docker.com/r/yasinsaeeniya/go-user-service)  
+- [Docker Compose Documentation](https://docs.docker.com/compose/)  
+
+
 
