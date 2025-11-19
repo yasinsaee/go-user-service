@@ -20,6 +20,10 @@ func NewSMSProviderKavenegar(apiKey, sender string) *SMSProviderKavenegar {
 	}
 }
 
+
+//Should Change with Document Im not sure this is work
+//please if you want another provider send document or send pr
+//yasinvsaee@gmail.com
 func (s *SMSProviderKavenegar) Send(receiver string, code string) error {
 	message := fmt.Sprintf("Your OTP code is: %s", code)
 
