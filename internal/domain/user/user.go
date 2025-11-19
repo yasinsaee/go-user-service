@@ -15,7 +15,7 @@ type User struct {
 	Username     string               `bson:"username" json:"username"`
 	Email        string               `bson:"email" json:"email"`
 	Password     string               `bson:"password" json:"-"`
-	PhoneNumber  string               `bson:"phone_number,omitempty" json:"phone_number,omitempty"` //optional
+	PhoneNumber  string               `bson:"phone_number" json:"phone_number"`
 	IsActive     bool                 `bson:"is_active" json:"is_active"`
 	CreatedAt    time.Time            `bson:"created_at" json:"created_at"`
 	UpdatedAt    time.Time            `bson:"updated_at" json:"updated_at"`

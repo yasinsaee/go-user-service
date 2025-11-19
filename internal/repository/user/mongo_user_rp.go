@@ -32,7 +32,13 @@ func (r *mongoUserRepository) Create(user *user.User) error {
 // FindByUsername returns a user document that matches the given username.
 func (r *mongoUserRepository) FindByUsername(username string) (*user.User, error) {
 	u := new(user.User)
-	query := bson.M{"username": username}
+	query := bson.M{
+		"$or": []bson.M{
+			{"username": username},
+			{"phonenumber": username},
+			{"email": username},
+		},
+	}
 	err := mongo2.FindOne(r.collection.Name(), query, u)
 	return u, err
 }
