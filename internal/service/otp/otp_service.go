@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/yasinsaee/go-user-service/internal/domain/otp"
+	"github.com/yasinsaee/go-user-service/internal/domain/otp/config"
 	"github.com/yasinsaee/go-user-service/pkg/logger"
 )
 
@@ -15,6 +16,7 @@ type OTPServiceImpl struct {
 	limiter   otp.OTPRateLimiter // Redis-based limiter
 	codeTTL   time.Duration
 	rateLimit time.Duration
+	config    config.OTPConfig
 }
 
 // NewOTPService creates a new OTP service instance.
@@ -24,6 +26,7 @@ func NewOTPService(
 	limiter otp.OTPRateLimiter,
 	codeTTLSeconds int,
 	rateLimitSeconds int,
+	config config.OTPConfig,
 ) otp.OTPService {
 	return &OTPServiceImpl{
 		repo:      repo,
@@ -31,6 +34,7 @@ func NewOTPService(
 		limiter:   limiter,
 		codeTTL:   time.Duration(codeTTLSeconds) * time.Second,
 		rateLimit: time.Duration(rateLimitSeconds) * time.Second,
+		config:    config,
 	}
 }
 
@@ -69,7 +73,7 @@ func (s *OTPServiceImpl) ListAll() (otp.OTPs, error) {
 
 // GenerateCode creates a 6-digit numeric OTP code.
 func (s *OTPServiceImpl) GenerateCode() string {
-	return otp.GenerateNumericCode(6)
+	return otp.GenerateCode(s.config.Length, s.config.Charset)
 }
 
 // SaveCode stores the OTP in the database

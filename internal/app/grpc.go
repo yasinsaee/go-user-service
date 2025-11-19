@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/yasinsaee/go-user-service/internal/app/config"
+	otp_config "github.com/yasinsaee/go-user-service/internal/domain/otp/config"
 	"github.com/yasinsaee/go-user-service/internal/domain/otp/providers"
 	otpgrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/otp"
 	permissiongrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/permission"
@@ -45,11 +46,14 @@ func StartGRPCServer() {
 	//providers
 	provider := providers.NewOTPProvider()
 
+	//otp config
+	otpConfig := otp_config.LoadOTPConfig()
+
 	//services
 	permissionService := permission.NewPermissionService(permissionRepo)
 	roleService := role.NewRoleService(roleRepo)
 	userService := user.NewUserService(userRepo)
-	otpService := otp.NewOTPService(otpRepo, provider, nil, 120, 60)
+	otpService := otp.NewOTPService(otpRepo, provider, nil, 120, 60, otpConfig)
 
 	//handlers
 	permissionHandler := permissiongrpc.New(permissionService)
