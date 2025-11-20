@@ -42,19 +42,19 @@ func NewOTPService(
 // CRUD
 //
 
-func (s *OTPServiceImpl) Create(o *otp.OTP) error {
+func (s *OTPServiceImpl) Create(o *otp.Otp) error {
 	return s.repo.Create(o)
 }
 
-func (s *OTPServiceImpl) GetByID(id any) (*otp.OTP, error) {
+func (s *OTPServiceImpl) GetByID(id any) (*otp.Otp, error) {
 	return s.repo.FindByID(id)
 }
 
-func (s *OTPServiceImpl) GetByName(receiver string) (*otp.OTP, error) {
+func (s *OTPServiceImpl) GetByName(receiver string) (*otp.Otp, error) {
 	return s.repo.FindByName(receiver)
 }
 
-func (s *OTPServiceImpl) Update(o *otp.OTP) error {
+func (s *OTPServiceImpl) Update(o *otp.Otp) error {
 	o.UpdatedAt = time.Now()
 	return s.repo.Update(o)
 }
@@ -63,7 +63,7 @@ func (s *OTPServiceImpl) Delete(id any) error {
 	return s.repo.Delete(id)
 }
 
-func (s *OTPServiceImpl) ListAll() (otp.OTPs, error) {
+func (s *OTPServiceImpl) ListAll() (otp.Otps, error) {
 	return s.repo.List()
 }
 
@@ -78,7 +78,7 @@ func (s *OTPServiceImpl) GenerateCode() string {
 
 // SaveCode stores the OTP in the database
 func (s *OTPServiceImpl) SaveCode(receiver string, code string, ttlSeconds int) error {
-	o := &otp.OTP{
+	o := &otp.Otp{
 		Receiver:  receiver,
 		Code:      code,
 		Used:      false,
@@ -128,9 +128,11 @@ func (s *OTPServiceImpl) SendCode(receiver string, code string) error {
 		}
 	}
 
-	if err := s.provider.Send(receiver, code); err != nil {
-		logger.Error("otp send failed: ", err.Error())
-		return err
+	if s.provider != nil {
+		if err := s.provider.Send(receiver, code); err != nil {
+			logger.Error("otp send failed: ", err.Error())
+			return err
+		}
 	}
 
 	if s.limiter != nil {

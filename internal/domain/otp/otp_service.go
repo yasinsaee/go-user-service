@@ -3,12 +3,12 @@ package otp
 type OTPService interface {
 
 	// CRUD
-	Create(otp *OTP) error
-	GetByID(id any) (*OTP, error)
-	GetByName(name string) (*OTP, error)
-	Update(otp *OTP) error
+	Create(otp *Otp) error
+	GetByID(id any) (*Otp, error)
+	GetByName(name string) (*Otp, error)
+	Update(otp *Otp) error
 	Delete(id any) error
-	ListAll() (OTPs, error)
+	ListAll() (Otps, error)
 
 	// OTP business logic
 	GenerateCode() string

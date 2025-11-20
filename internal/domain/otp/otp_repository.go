@@ -1,10 +1,10 @@
 package otp
 
 type OTPRepository interface {
-	Create(OTP *OTP) error
-	FindByID(id any) (*OTP, error)
-	FindByName(name string) (*OTP, error)
-	Update(OTP *OTP) error
+	Create(OTP *Otp) error
+	FindByID(id any) (*Otp, error)
+	FindByName(name string) (*Otp, error)
+	Update(OTP *Otp) error
 	Delete(id any) error
-	List() (OTPs, error)
+	List() (Otps, error)
 }

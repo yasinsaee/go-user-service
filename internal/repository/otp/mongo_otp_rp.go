@@ -24,29 +24,29 @@ func NewMongoOTPRepository(db *mongo.Database, collectionName string) otp.OTPRep
 }
 
 // Create inserts a new OTP into the database and sets timestamps.
-func (r *mongoOTPRepository) Create(o *otp.OTP) error {
+func (r *mongoOTPRepository) Create(o *otp.Otp) error {
 	o.CreatedAt = time.Now()
 	o.UpdatedAt = time.Now()
 	return mongo2.Create(o)
 }
 
 // FindByID retrieves an OTP by its ID.
-func (r *mongoOTPRepository) FindByID(id any) (*otp.OTP, error) {
-	o := new(otp.OTP)
+func (r *mongoOTPRepository) FindByID(id any) (*otp.Otp, error) {
+	o := new(otp.Otp)
 	err := mongo2.Get(r.collection.Name(), id, o)
 	return o, err
 }
 
 // FindByName retrieves an OTP by a name field (if your model supports it).
-func (r *mongoOTPRepository) FindByName(name string) (*otp.OTP, error) {
-	o := new(otp.OTP)
+func (r *mongoOTPRepository) FindByName(name string) (*otp.Otp, error) {
+	o := new(otp.Otp)
 	query := bson.M{"name": name}
 	err := mongo2.FindOne(r.collection.Name(), query, o)
 	return o, err
 }
 
 // Update updates an existing OTP record.
-func (r *mongoOTPRepository) Update(o *otp.OTP) error {
+func (r *mongoOTPRepository) Update(o *otp.Otp) error {
 	o.UpdatedAt = time.Now()
 	return mongo2.Update(o)
 }
@@ -62,8 +62,8 @@ func (r *mongoOTPRepository) Delete(id any) error {
 }
 
 // List returns all stored OTP entries.
-func (r *mongoOTPRepository) List() (otp.OTPs, error) {
-	list := make(otp.OTPs, 0)
+func (r *mongoOTPRepository) List() (otp.Otps, error) {
+	list := make(otp.Otps, 0)
 	err := mongo2.Find(r.collection.Name(), bson.M{}, &list)
 	if err != nil {
 		logger.Error("error while fetching otps:", err.Error())

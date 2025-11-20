@@ -149,7 +149,7 @@ func (h *Handler) ValidateOTP(ctx context.Context, req *otpPb.ValidateOTPRequest
 // Helper
 //
 
-func toProto(o *otp.OTP) *otpPb.OTP {
+func toProto(o *otp.Otp) *otpPb.OTP {
 	return &otpPb.OTP{
 		Id:        o.ID.Hex(),
 		Receiver:  o.Receiver,

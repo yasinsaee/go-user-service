@@ -1,14 +1,12 @@
 package providers
 
 import (
-	"fmt"
-
 	"github.com/yasinsaee/go-user-service/internal/app/config"
 	"github.com/yasinsaee/go-user-service/internal/domain/otp"
 )
 
 func NewOTPProvider() otp.OTPProvider {
-	providerType := config.GetEnv("OTP_PROVIDER", "KAVENEGAR")
+	providerType := config.GetEnv("OTP_PROVIDER", "")
 
 	switch providerType {
 	case "KAVENEGAR":
@@ -22,9 +20,6 @@ func NewOTPProvider() otp.OTPProvider {
 		// user := config.GetEnv("SMTP_USER", "")
 		// pass := config.GetEnv("SMTP_PASS", "")
 		// return NewEmailProvider(host, port, user, pass)
-
-	default:
-		panic(fmt.Sprintf("unknown OTP provider: %s", providerType))
 	}
 	return nil
 }

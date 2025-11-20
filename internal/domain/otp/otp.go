@@ -7,7 +7,7 @@ import (
 )
 
 type (
-	OTP struct {
+	Otp struct {
 		ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 		Receiver    string             `bson:"receiver" json:"receiver"`
 		Code        string             `bson:"code" json:"code"`
@@ -20,4 +20,4 @@ type (
 	}
 )
 
-type OTPs []OTP
+type Otps []Otp
