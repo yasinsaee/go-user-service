@@ -1,23 +1,25 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/yasinsaee/go-user-service/internal/app/config"
 )
 
+func printBanner() {
+	fmt.Println(` ____ ___  ______________________________    __________________________________   ____.____________ ___________
+|    |   \/   _____/\_   _____/\______   \  /   _____/\_   _____/\______   \   \ /   /|   \_   ___ \\_   _____/
+|    |   /\_____  \  |    __)_  |       _/  \_____  \  |    __)_  |       _/\   Y   / |   /    \  \/ |    __)_ 
+|    |  / /        \ |        \ |    |   \  /        \ |        \ |    |   \ \     /  |   \     \____|        \
+|______/ /_______  //_______  / |____|_  / /_______  //_______  / |____|_  /  \___/   |___|\______  /_______  /
+                 \/         \/         \/          \/         \/         \/                       \/        \/ `)
+}
+
 func StartApp() {
+	printBanner()
+
 	config.LoadEnv()
-
 	InitMongo()
-
 	InitJWT()
-
 	StartGRPCServer()
-
-	// e := echo.New()
-
-	// Register(e)
-
-	// port := config.GetEnv("PORT", "8080")
-	// fmt.Println("✅ Server running on port:", port)
-	// e.Logger.Fatal(e.Start(":" + port))
 }
