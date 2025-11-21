@@ -40,7 +40,7 @@ func (r *mongoOTPRepository) FindByID(id any) (*otp.Otp, error) {
 // FindByName retrieves an OTP by a name field (if your model supports it).
 func (r *mongoOTPRepository) FindByName(name string) (*otp.Otp, error) {
 	o := new(otp.Otp)
-	query := bson.M{"name": name}
+	query := bson.M{"receiver": name}
 	err := mongo2.FindOne(r.collection.Name(), query, o)
 	return o, err
 }
