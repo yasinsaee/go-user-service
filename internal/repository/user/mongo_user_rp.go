@@ -25,7 +25,7 @@ func NewMongoUserRepository(db *mongo.Database, collectionName string) user.User
 
 // Create inserts a new user into the database and sets the creation timestamp.
 func (r *mongoUserRepository) Create(user *user.User) error {
-	user.CreatedAt = time.Now()
+	user.CreatedAt = time.Now().UTC()
 	return mongo2.Create(user)
 }
 
@@ -52,7 +52,7 @@ func (r *mongoUserRepository) FindByID(id any) (*user.User, error) {
 
 // Update modifies an existing user and sets the update timestamp.
 func (r *mongoUserRepository) Update(user *user.User) error {
-	user.UpdatedAt = time.Now()
+	user.UpdatedAt = time.Now().UTC()
 	return mongo2.Update(user)
 }
 

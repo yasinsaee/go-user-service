@@ -55,7 +55,7 @@ func (s *OTPServiceImpl) GetByName(receiver string) (*otp.Otp, error) {
 }
 
 func (s *OTPServiceImpl) Update(o *otp.Otp) error {
-	o.UpdatedAt = time.Now()
+	o.UpdatedAt = time.Now().UTC()
 	return s.repo.Update(o)
 }
 
@@ -82,24 +82,24 @@ func (s *OTPServiceImpl) SaveCode(receiver string, code string, ttlSeconds int) 
 		Receiver:  receiver,
 		Code:      code,
 		Used:      false,
-		SendAt:    time.Now(),
-		ExpiresAt: time.Now().Add(time.Duration(ttlSeconds) * time.Second),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		SendAt:    time.Now().UTC(),
+		ExpiresAt: time.Now().UTC().Add(time.Duration(ttlSeconds) * time.Second),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
 	}
 	return s.repo.Create(o)
 }
 
 // ValidateCode checks whether code is valid, not expired, and not used.
 func (s *OTPServiceImpl) ValidateCode(receiver string, code string) (bool, error) {
-	record, err := s.repo.FindByName(receiver)
+	record, err := s.repo.FindByReceiverAndCode(receiver, code)
 	if err != nil {
 		return false, err
 	}
-	if record == nil {
+	if (record == &otp.Otp{} || record == nil) {
 		return false, errors.New("otp not found")
 	}
-	if record.ExpiresAt.Before(time.Now()) {
+	if record.ExpiresAt.Before(time.Now().UTC()) {
 		return false, errors.New("otp expired")
 	}
 	if record.Used {
@@ -109,10 +109,13 @@ func (s *OTPServiceImpl) ValidateCode(receiver string, code string) (bool, error
 		return false, errors.New("invalid code")
 	}
 
-	// Mark as used
+	// Mark only this OTP as used
 	record.Used = true
-	_ = s.repo.Update(record)
+	if err := s.repo.Update(record); err != nil {
+		return false, errors.New("cannot update otp as used")
+	}
 
+	_ = s.repo.DeleteExpiredOtps()
 	return true, nil
 }
 

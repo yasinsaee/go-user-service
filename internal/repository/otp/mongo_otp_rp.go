@@ -25,8 +25,8 @@ func NewMongoOTPRepository(db *mongo.Database, collectionName string) otp.OTPRep
 
 // Create inserts a new OTP into the database and sets timestamps.
 func (r *mongoOTPRepository) Create(o *otp.Otp) error {
-	o.CreatedAt = time.Now()
-	o.UpdatedAt = time.Now()
+	o.CreatedAt = time.Now().UTC()
+	o.UpdatedAt = time.Now().UTC()
 	return mongo2.Create(o)
 }
 
@@ -47,7 +47,7 @@ func (r *mongoOTPRepository) FindByName(name string) (*otp.Otp, error) {
 
 // Update updates an existing OTP record.
 func (r *mongoOTPRepository) Update(o *otp.Otp) error {
-	o.UpdatedAt = time.Now()
+	o.UpdatedAt = time.Now().UTC()
 	return mongo2.Update(o)
 }
 
@@ -70,4 +70,23 @@ func (r *mongoOTPRepository) List() (otp.Otps, error) {
 		return nil, err
 	}
 	return list, nil
+}
+
+func (r *mongoOTPRepository) FindByReceiverAndCode(receiver, code string) (*otp.Otp, error) {
+	o := new(otp.Otp)
+	query := bson.M{
+		"receiver":   receiver,
+		"code":       code,
+		"used":       false,
+		"expires_at": bson.M{"$gt": time.Now().UTC()},
+	}
+	err := mongo2.FindOne(r.collection.Name(), query, o)
+	return o, err
+}
+
+func (r *mongoOTPRepository) DeleteExpiredOtps() error {
+	filter := bson.M{
+		"expires_at": bson.M{"$lt": time.Now().UTC()},
+	}
+	return mongo2.RemoveMany(r.collection.Name(), filter)
 }

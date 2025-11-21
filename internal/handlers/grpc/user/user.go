@@ -127,7 +127,11 @@ func (h *Handler) getRoleFromIDs(ids []primitive.ObjectID) ([]*userpb.Role, erro
 }
 
 func (h *Handler) toUserPb(u *user.User) *userpb.User {
-	rolePb, _ := h.getRoleFromIDs(u.Roles)
+	rolePb := make([]*userpb.Role, 0)
+	if len(u.Roles) > 0 {
+		rolePb, _ = h.getRoleFromIDs(u.Roles)
+
+	}
 
 	return &userpb.User{
 		FirstName:    u.FirstName,
@@ -192,17 +196,18 @@ func (h *Handler) Register(ctx context.Context, req *userpb.RegisterUser) (*user
 		PhoneNumber:  req.GetPhoneNumber(),
 		Password:     req.GetPassword(),
 	}
-
-	for _, r := range req.GetRoles() {
-		roleID, err := primitive.ObjectIDFromHex(r)
-		if err != nil {
-			return nil, status.Errorf(codes.InvalidArgument, "invalid role ID: %v", err)
+	if req.GetRoles() != nil {
+		for _, r := range req.GetRoles() {
+			roleID, err := primitive.ObjectIDFromHex(r)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "invalid role ID: %v", err)
+			}
+			role, err := h.getRoleByID(roleID)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to find role: %v", err)
+			}
+			u.Roles = append(u.Roles, role.ID)
 		}
-		role, err := h.getRoleByID(roleID)
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "failed to find role: %v", err)
-		}
-		u.Roles = append(u.Roles, role.ID)
 	}
 
 	if err := h.service.Register(u); err != nil {

@@ -44,7 +44,7 @@ func (h *Handler) UpdateOTP(ctx context.Context, req *otpPb.UpdateOTPRequest) (*
 	}
 
 	if req.GetTtlSeconds() > 0 {
-		o.ExpiresAt = time.Now().Add(time.Duration(req.GetTtlSeconds()) * time.Second)
+		o.ExpiresAt = time.Now().UTC().Add(time.Duration(req.GetTtlSeconds()) * time.Second)
 	}
 
 	if err := h.service.Update(o); err != nil {

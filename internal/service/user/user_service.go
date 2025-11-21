@@ -28,7 +28,7 @@ func (s *userService) Register(user *user.User) error {
 	hashed := util.HashPassword(user.Password)
 
 	user.Password = hashed
-	user.CreatedAt = time.Now()
+	user.CreatedAt = time.Now().UTC()
 	return s.repo.Create(user)
 }
 
@@ -42,7 +42,7 @@ func (s *userService) Login(username, password string) (*user.User, error) {
 		return nil, errors.New("invalid username or password")
 	}
 
-	user.LastLogin = time.Now()
+	user.LastLogin = time.Now().UTC()
 	if err = s.Update(user); err != nil {
 		return nil, errors.New("update failed")
 	}
@@ -59,7 +59,7 @@ func (s *userService) GetByUsername(username string) (*user.User, error) {
 }
 
 func (s *userService) Update(user *user.User) error {
-	user.UpdatedAt = time.Now()
+	user.UpdatedAt = time.Now().UTC()
 	return s.repo.Update(user)
 }
 

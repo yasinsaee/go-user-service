@@ -50,7 +50,7 @@ func Init(config JWTConfig) {
 
 func (t *TokenConfig) GenerateAccessToken() (string, time.Time, error) {
 	// Declare the expiration time of the token - ? hours.
-	expirationTime := time.Now().Add(time.Hour * time.Duration(conf.Exp))
+	expirationTime := time.Now().UTC().Add(time.Hour * time.Duration(conf.Exp))
 	return t.generateToken(expirationTime, []byte(conf.PrivateKey))
 }
 
@@ -67,13 +67,13 @@ func (t *TokenConfig) generateToken(expirationTime time.Time, privateKey []byte)
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(privateKey)
 	if err != nil {
-		return "", time.Now(), err
+		return "", time.Now().UTC(), err
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	tokenString, err := token.SignedString(key)
 	if err != nil {
-		return "", time.Now(), err
+		return "", time.Now().UTC(), err
 	}
 
 	return tokenString, expirationTime, nil
@@ -103,7 +103,7 @@ func validation(token string) (*JWTClaims, error) {
 		return nil, err
 	}
 
-	if claims.ExpiresAt < time.Now().Unix() {
+	if claims.ExpiresAt < time.Now().UTC().Unix() {
 		return nil, ErrTokenExpired
 	}
 

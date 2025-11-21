@@ -22,8 +22,8 @@ func NewMongoRoleRepository(db *mongo.Database, collectionName string) role.Role
 }
 
 func (r *mongoRoleRepository) Create(role *role.Role) error {
-	role.CreatedAt = time.Now()
-	role.UpdatedAt = time.Now()
+	role.CreatedAt = time.Now().UTC()
+	role.UpdatedAt = time.Now().UTC()
 	return mongo2.Create(role)
 }
 
@@ -41,7 +41,7 @@ func (r *mongoRoleRepository) FindByName(name string) (*role.Role, error) {
 }
 
 func (r *mongoRoleRepository) Update(role *role.Role) error {
-	role.UpdatedAt = time.Now()
+	role.UpdatedAt = time.Now().UTC()
 	return mongo2.Update(role)
 }
 

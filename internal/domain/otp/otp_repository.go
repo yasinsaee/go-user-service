@@ -7,4 +7,6 @@ type OTPRepository interface {
 	Update(OTP *Otp) error
 	Delete(id any) error
 	List() (Otps, error)
+	FindByReceiverAndCode(receiver, code string) (*Otp, error)
+	DeleteExpiredOtps() error
 }

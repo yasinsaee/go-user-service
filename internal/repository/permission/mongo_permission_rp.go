@@ -25,8 +25,8 @@ func NewMongoPermissionRepository(db *mongo.Database, collectionName string) per
 
 // Create inserts a new permission into the database and sets the creation timestamp.
 func (r *mongoPermissionRepository) Create(permission *permission.Permission) error {
-	permission.CreatedAt = time.Now()
-	permission.UpdatedAt = time.Now()
+	permission.CreatedAt = time.Now().UTC()
+	permission.UpdatedAt = time.Now().UTC()
 	return mongo2.Create(permission)
 }
 
@@ -47,7 +47,7 @@ func (r *mongoPermissionRepository) FindByID(id any) (*permission.Permission, er
 
 // Update modifies an existing permission and sets the update timestamp.
 func (r *mongoPermissionRepository) Update(permission *permission.Permission) error {
-	permission.UpdatedAt = time.Now()
+	permission.UpdatedAt = time.Now().UTC()
 	return mongo2.Update(permission)
 }
 
