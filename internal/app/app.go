@@ -21,5 +21,6 @@ func StartApp() {
 	config.LoadEnv()
 	InitMongo()
 	InitJWT()
+	InitRedis()
 	StartGRPCServer()
 }
