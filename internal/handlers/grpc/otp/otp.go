@@ -116,8 +116,7 @@ func (h *Handler) RequestOTP(ctx context.Context, req *otpPb.RequestOTPRequest) 
 
 	code := h.service.GenerateCode()
 
-	ttlSecond := 120
-	err = h.service.SaveCode(receiver, code, ttlSecond)
+	err = h.service.SaveCode(receiver, code)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to save otp: %v", err)
 	}

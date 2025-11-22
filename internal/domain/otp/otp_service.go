@@ -12,7 +12,7 @@ type OTPService interface {
 
 	// OTP business logic
 	GenerateCode() string
-	SaveCode(receiver string, code string, ttlSeconds int) error
+	SaveCode(receiver string, code string) error
 	ValidateCode(receiver string, code string) (bool, error)
 	SendCode(receiver string, code string) error
 

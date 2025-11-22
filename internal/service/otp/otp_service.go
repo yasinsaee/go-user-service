@@ -78,13 +78,13 @@ func (s *OTPServiceImpl) GenerateCode() string {
 }
 
 // SaveCode stores the OTP in the database
-func (s *OTPServiceImpl) SaveCode(receiver string, code string, ttlSeconds int) error {
+func (s *OTPServiceImpl) SaveCode(receiver string, code string) error {
 	o := &otp.Otp{
 		Receiver:  receiver,
 		Code:      code,
 		Used:      false,
 		SendAt:    time.Now().UTC(),
-		ExpiresAt: time.Now().UTC().Add(time.Duration(ttlSeconds) * time.Second),
+		ExpiresAt: time.Now().UTC().Add(s.codeTTL),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	}
