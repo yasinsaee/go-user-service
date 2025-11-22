@@ -11,12 +11,12 @@ import (
 
 // OTPServiceImpl implements otp.OTPService interface
 type OTPServiceImpl struct {
-	repo      otp.OTPRepository
-	provider  otp.OTPProvider    // SMS / Email provider
-	limiter   otp.OTPRateLimiter // Redis-based limiter
-	codeTTL   time.Duration
-	rateLimit time.Duration
-	config    config.OTPConfig
+	repo        otp.OTPRepository
+	provider    otp.OTPProvider    // SMS / Email provider
+	limiter     otp.OTPRateLimiter // Redis-based limiter
+	codeTTL     time.Duration
+	config      config.OTPConfig
+	rateLimiter int
 }
 
 // NewOTPService creates a new OTP service instance.
@@ -24,17 +24,18 @@ func NewOTPService(
 	repo otp.OTPRepository,
 	provider otp.OTPProvider,
 	limiter otp.OTPRateLimiter,
-	codeTTLSeconds int,
-	rateLimitSeconds int,
+	codeTTLSeconds time.Duration,
+	rateLimiter int,
 	config config.OTPConfig,
+
 ) otp.OTPService {
 	return &OTPServiceImpl{
-		repo:      repo,
-		provider:  provider,
-		limiter:   limiter,
-		codeTTL:   time.Duration(codeTTLSeconds) * time.Second,
-		rateLimit: time.Duration(rateLimitSeconds) * time.Second,
-		config:    config,
+		repo:        repo,
+		provider:    provider,
+		limiter:     limiter,
+		codeTTL:     codeTTLSeconds,
+		config:      config,
+		rateLimiter: rateLimiter,
 	}
 }
 
@@ -139,7 +140,7 @@ func (s *OTPServiceImpl) SendCode(receiver string, code string) error {
 	}
 
 	if s.limiter != nil {
-		_ = s.limiter.MarkSend(receiver, s.rateLimit)
+		_ = s.limiter.MarkSend(receiver, s.codeTTL)
 	}
 	return nil
 }
@@ -159,5 +160,5 @@ func (s *OTPServiceImpl) MarkSend(receiver string) error {
 	if s.limiter == nil {
 		return nil
 	}
-	return s.limiter.MarkSend(receiver, s.rateLimit)
+	return s.limiter.MarkSend(receiver, s.codeTTL)
 }

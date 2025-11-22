@@ -17,7 +17,7 @@ func InitRedis() {
 			Addr:     config.GetEnv("REDIS_ADDR", ""),
 			Password: config.GetEnv("REDIS_PASSWORD", ""),
 			DB:       db,
-			TTL:      time.Duration(time.Duration(ttl).Seconds()),
+			TTL:      time.Duration(ttl) * time.Second,
 		})
 	}
 

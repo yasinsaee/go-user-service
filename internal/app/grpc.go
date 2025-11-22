@@ -16,6 +16,7 @@ import (
 	repository_role "github.com/yasinsaee/go-user-service/internal/repository/role"
 	repository_user "github.com/yasinsaee/go-user-service/internal/repository/user"
 	"github.com/yasinsaee/go-user-service/internal/service/otp"
+	ratelimiter "github.com/yasinsaee/go-user-service/internal/service/otp/redis"
 	"github.com/yasinsaee/go-user-service/internal/service/permission"
 	"github.com/yasinsaee/go-user-service/internal/service/role"
 	"github.com/yasinsaee/go-user-service/internal/service/user"
@@ -48,12 +49,14 @@ func StartGRPCServer() {
 
 	//otp config
 	otpConfig := otp_config.LoadOTPConfig()
+	////rate limiter
+	rateLimiter := ratelimiter.NewRedisOTPRateLimiter(int(otpConfig.RateLimit))
 
 	//services
 	permissionService := permission.NewPermissionService(permissionRepo)
 	roleService := role.NewRoleService(roleRepo)
 	userService := user.NewUserService(userRepo)
-	otpService := otp.NewOTPService(otpRepo, provider, nil, int(otpConfig.TTL), int(otpConfig.RateLimit), otpConfig)
+	otpService := otp.NewOTPService(otpRepo, provider, rateLimiter, otpConfig.TTL, int(otpConfig.RateLimitSecond), otpConfig)
 
 	//handlers
 	permissionHandler := permissiongrpc.New(permissionService)

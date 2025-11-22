@@ -118,3 +118,9 @@ func TTL(key string) (time.Duration, error) {
 	ctx := context.Background()
 	return DB.Client.TTL(ctx, key).Result()
 }
+
+// Expire sets expiration on a key
+func Expire(key string, ttl time.Duration) error {
+	ctx := context.Background()
+	return DB.Client.Expire(ctx, key, ttl).Err()
+}
