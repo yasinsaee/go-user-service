@@ -106,7 +106,15 @@ func (h *Handler) ListOTPs(ctx context.Context, req *otpPb.ListOTPsRequest) (*ot
 func (h *Handler) RequestOTP(ctx context.Context, req *otpPb.RequestOTPRequest) (*otpPb.RequestOTPResponse, error) {
 	receiver := req.GetReceiver()
 
-	ok, err := h.service.CanSend(receiver)
+	ok, err := h.service.CheckHardLimit(receiver)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "rate limit error: %v", err)
+	}
+	if !ok {
+		return nil, status.Error(codes.ResourceExhausted, "too many requests, youre blocked now")
+	}
+
+	ok, err = h.service.CanSend(receiver)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "rate limit error: %v", err)
 	}
