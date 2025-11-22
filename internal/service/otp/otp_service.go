@@ -24,7 +24,7 @@ func NewOTPService(
 	repo otp.OTPRepository,
 	provider otp.OTPProvider,
 	limiter otp.OTPRateLimiter,
-	codeTTLSeconds time.Duration,
+	codeTTL time.Duration,
 	rateLimiter int,
 	config config.OTPConfig,
 
@@ -33,7 +33,7 @@ func NewOTPService(
 		repo:        repo,
 		provider:    provider,
 		limiter:     limiter,
-		codeTTL:     codeTTLSeconds,
+		codeTTL:     codeTTL,
 		config:      config,
 		rateLimiter: rateLimiter,
 	}
@@ -122,14 +122,12 @@ func (s *OTPServiceImpl) ValidateCode(receiver string, code string) (bool, error
 
 // SendCode delivers the OTP using provider (SMS, Email, ...)
 func (s *OTPServiceImpl) SendCode(receiver string, code string) error {
-	if s.limiter != nil {
-		ok, err := s.limiter.CanSend(receiver)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			return errors.New("too many requests, please wait")
-		}
+	ok, err := s.CanSend(receiver)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("too many requests, please wait")
 	}
 
 	if s.provider != nil {
@@ -139,9 +137,11 @@ func (s *OTPServiceImpl) SendCode(receiver string, code string) error {
 		}
 	}
 
-	if s.limiter != nil {
-		_ = s.limiter.MarkSend(receiver, s.codeTTL)
+	if err := s.MarkSend(receiver); err != nil {
+		logger.Error("otp marked failed: ", err.Error())
+		return err
 	}
+
 	return nil
 }
 
