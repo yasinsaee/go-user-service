@@ -1,10 +1,4 @@
- ____ ___  ______________________________    __________________________________   ____.____________ ___________
-|    |   \/   _____/\_   _____/\______   \  /   _____/\_   _____/\______   \   \ /   /|   \_   ___ \\_   _____/
-|    |   /\_____  \  |    __)_  |       _/  \_____  \  |    __)_  |       _/\   Y   / |   /    \  \/ |    __)_ 
-|    |  / /        \ |        \ |    |   \  /        \ |        \ |    |   \ \     /  |   \     \____|        \
-|______/ /_______  //_______  / |____|_  / /_______  //_______  / |____|_  /  \___/   |___|\______  /_______  /
-                 \/         \/         \/          \/         \/         \/                       \/        \/ 
-
+# 📦 User Service
 A gRPC-based **User Service** built with Go, using MongoDB as database, supporting JWT with RSA keys, fully dockerized and ready for Docker Hub & Docker Compose usage.
 
 ### Features
@@ -70,6 +64,7 @@ You can start sending **gRPC requests** to it and integrate it into your applica
 - [MongoDB Documentation](https://www.mongodb.com/docs/)  
 - [Docker Hub – go-user-service](https://hub.docker.com/r/yasinsaeeniya/go-user-service)  
 - [Docker Compose Documentation](https://docs.docker.com/compose/)  
+
 
 
 
