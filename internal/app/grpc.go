@@ -56,7 +56,7 @@ func StartGRPCServer() {
 	permissionService := permission.NewPermissionService(permissionRepo)
 	roleService := role.NewRoleService(roleRepo)
 	userService := user.NewUserService(userRepo)
-	otpService := otp.NewOTPService(otpRepo, provider, rateLimiter, otpConfig.TTL, int(otpConfig.RateLimitSecond), otpConfig)
+	otpService := otp.NewOTPService(otpRepo, provider, rateLimiter, otpConfig.TTL, otpConfig.RateLimit, otpConfig, otpConfig.MaxOTPPerReceiver)
 
 	//handlers
 	permissionHandler := permissiongrpc.New(permissionService)

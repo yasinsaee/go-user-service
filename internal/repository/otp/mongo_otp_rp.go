@@ -90,3 +90,7 @@ func (r *mongoOTPRepository) DeleteExpiredOtps() error {
 	}
 	return mongo2.RemoveMany(r.collection.Name(), filter)
 }
+
+func (r *mongoOTPRepository) Count(q bson.M) (int, error) {
+	return mongo2.Count(r.collection.Name(), q)
+}

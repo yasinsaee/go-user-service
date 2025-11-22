@@ -7,16 +7,18 @@ import (
 	"github.com/yasinsaee/go-user-service/internal/domain/otp"
 	"github.com/yasinsaee/go-user-service/internal/domain/otp/config"
 	"github.com/yasinsaee/go-user-service/pkg/logger"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // OTPServiceImpl implements otp.OTPService interface
 type OTPServiceImpl struct {
-	repo        otp.OTPRepository
-	provider    otp.OTPProvider    // SMS / Email provider
-	limiter     otp.OTPRateLimiter // Redis-based limiter
-	codeTTL     time.Duration
-	config      config.OTPConfig
-	rateLimiter int
+	repo              otp.OTPRepository
+	provider          otp.OTPProvider    // SMS / Email provider
+	limiter           otp.OTPRateLimiter // Redis-based limiter
+	codeTTL           time.Duration
+	config            config.OTPConfig
+	rateLimiter       int
+	maxOTPPerReceiver int
 }
 
 // NewOTPService creates a new OTP service instance.
@@ -27,15 +29,17 @@ func NewOTPService(
 	codeTTL time.Duration,
 	rateLimiter int,
 	config config.OTPConfig,
+	maxOTPPerReceiver int,
 
 ) otp.OTPService {
 	return &OTPServiceImpl{
-		repo:        repo,
-		provider:    provider,
-		limiter:     limiter,
-		codeTTL:     codeTTL,
-		config:      config,
-		rateLimiter: rateLimiter,
+		repo:              repo,
+		provider:          provider,
+		limiter:           limiter,
+		codeTTL:           codeTTL,
+		config:            config,
+		rateLimiter:       rateLimiter,
+		maxOTPPerReceiver: maxOTPPerReceiver,
 	}
 }
 
@@ -66,6 +70,10 @@ func (s *OTPServiceImpl) Delete(id any) error {
 
 func (s *OTPServiceImpl) ListAll() (otp.Otps, error) {
 	return s.repo.List()
+}
+
+func (s *OTPServiceImpl) Count(q bson.M) (int, error) {
+	return s.repo.Count(q)
 }
 
 //
@@ -161,4 +169,16 @@ func (s *OTPServiceImpl) MarkSend(receiver string) error {
 		return nil
 	}
 	return s.limiter.MarkSend(receiver, s.codeTTL)
+}
+
+// Hard limit Check
+func (s *OTPServiceImpl) CheckHardLimit(receiver string) (bool, error) {
+	if s.maxOTPPerReceiver > 0 {
+		count, _ := s.Count(bson.M{"receiver": receiver})
+		if count >= s.maxOTPPerReceiver {
+			return false, errors.New("too many OTP requests, contact support")
+		}
+	}
+
+	return true, nil
 }

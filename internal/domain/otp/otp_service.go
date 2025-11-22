@@ -1,5 +1,7 @@
 package otp
 
+import "go.mongodb.org/mongo-driver/bson"
+
 type OTPService interface {
 
 	// CRUD
@@ -9,6 +11,7 @@ type OTPService interface {
 	Update(otp *Otp) error
 	Delete(id any) error
 	ListAll() (Otps, error)
+	Count(bson.M) (int, error)
 
 	// OTP business logic
 	GenerateCode() string
@@ -19,4 +22,7 @@ type OTPService interface {
 	// Rate limiting
 	CanSend(receiver string) (bool, error)
 	MarkSend(receiver string) error
+
+	//Hard limit Check
+	CheckHardLimit(receiver string) (bool, error)
 }

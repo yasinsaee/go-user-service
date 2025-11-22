@@ -7,11 +7,11 @@ import (
 )
 
 type OTPConfig struct {
-	Length          int
-	Charset         string
-	TTL             time.Duration
-	RateLimitSecond time.Duration
-	RateLimit       int
+	Length            int
+	Charset           string
+	TTL               time.Duration
+	RateLimit         int
+	MaxOTPPerReceiver int
 }
 
 func LoadOTPConfig() OTPConfig {
@@ -19,12 +19,14 @@ func LoadOTPConfig() OTPConfig {
 	charset := getEnv("OTP_CHARSET", "0123456789")
 	ttl := time.Duration(getEnvInt("OTP_TTL_SECONDS", 120)) * time.Second
 	rateLimit := getEnvInt("OTP_RATE_LIMIT", 5)
+	maxOTPPerReceiver := getEnvInt("MAX_OTP_PER_RECEIVER", 0)
 
 	return OTPConfig{
-		Length:          length,
-		Charset:         charset,
-		TTL:             ttl,
-		RateLimit:       rateLimit,
+		Length:            length,
+		Charset:           charset,
+		TTL:               ttl,
+		RateLimit:         rateLimit,
+		MaxOTPPerReceiver: maxOTPPerReceiver,
 	}
 }
 

@@ -1,5 +1,7 @@
 package otp
 
+import "go.mongodb.org/mongo-driver/bson"
+
 type OTPRepository interface {
 	Create(OTP *Otp) error
 	FindByID(id any) (*Otp, error)
@@ -9,4 +11,5 @@ type OTPRepository interface {
 	List() (Otps, error)
 	FindByReceiverAndCode(receiver, code string) (*Otp, error)
 	DeleteExpiredOtps() error
+	Count(q bson.M) (int, error)
 }
