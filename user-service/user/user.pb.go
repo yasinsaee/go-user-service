@@ -632,9 +632,10 @@ func (x *UpdateUser) GetPassword() string {
 
 type ResetPasswordUser struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
-	CurrentPassword   string                 `protobuf:"bytes,1,opt,name=current_password,json=currentPassword,proto3" json:"current_password,omitempty"`
-	NewPassword       string                 `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
-	RepeatNewPassword string                 `protobuf:"bytes,3,opt,name=repeat_new_password,json=repeatNewPassword,proto3" json:"repeat_new_password,omitempty"`
+	Username          string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	CurrentPassword   string                 `protobuf:"bytes,2,opt,name=current_password,json=currentPassword,proto3" json:"current_password,omitempty"`
+	NewPassword       string                 `protobuf:"bytes,3,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
+	RepeatNewPassword string                 `protobuf:"bytes,4,opt,name=repeat_new_password,json=repeatNewPassword,proto3" json:"repeat_new_password,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -667,6 +668,13 @@ func (x *ResetPasswordUser) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ResetPasswordUser.ProtoReflect.Descriptor instead.
 func (*ResetPasswordUser) Descriptor() ([]byte, []int) {
 	return file_user_service_user_user_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ResetPasswordUser) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
 }
 
 func (x *ResetPasswordUser) GetCurrentPassword() string {
@@ -754,11 +762,12 @@ const file_user_service_user_user_proto_rawDesc = "" +
 	"\busername\x18\x05 \x01(\tR\busername\x12\x14\n" +
 	"\x05email\x18\x06 \x01(\tR\x05email\x12!\n" +
 	"\fphone_number\x18\a \x01(\tR\vphoneNumber\x12\x1a\n" +
-	"\bpassword\x18\b \x01(\tR\bpassword\"\x91\x01\n" +
-	"\x11ResetPasswordUser\x12)\n" +
-	"\x10current_password\x18\x01 \x01(\tR\x0fcurrentPassword\x12!\n" +
-	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\x12.\n" +
-	"\x13repeat_new_password\x18\x03 \x01(\tR\x11repeatNewPassword2\xe1\x01\n" +
+	"\bpassword\x18\b \x01(\tR\bpassword\"\xad\x01\n" +
+	"\x11ResetPasswordUser\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12)\n" +
+	"\x10current_password\x18\x02 \x01(\tR\x0fcurrentPassword\x12!\n" +
+	"\fnew_password\x18\x03 \x01(\tR\vnewPassword\x12.\n" +
+	"\x13repeat_new_password\x18\x04 \x01(\tR\x11repeatNewPassword2\xe1\x01\n" +
 	"\vUserService\x120\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\x122\n" +
 	"\bRegister\x12\x12.user.RegisterUser\x1a\x12.user.UserResponse\x12.\n" +
