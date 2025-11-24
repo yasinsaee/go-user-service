@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/yasinsaee/go-user-service/internal/app/config"
 	"github.com/yasinsaee/go-user-service/internal/domain/permission"
 	"github.com/yasinsaee/go-user-service/internal/domain/role"
 	"github.com/yasinsaee/go-user-service/internal/domain/user"
@@ -212,6 +213,67 @@ func (h *Handler) Register(ctx context.Context, req *userpb.RegisterUser) (*user
 
 	if err := h.service.Register(u); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to register user: %v", err)
+	}
+
+	return &userpb.UserResponse{
+		User: h.toUserPb(u),
+	}, nil
+}
+
+func (h *Handler) ResetPassword(ctx context.Context, req *userpb.ResetPasswordUser) (*userpb.UserResponse, error) {
+	u, err := h.service.GetByUsername(req.GetUsername())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to found user: %v", err)
+	}
+
+	if err := h.service.ResetPassword(u, req.GetCurrentPassword(), req.GetNewPassword(), req.GetRepeatNewPassword()); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to reset password user: %v", err)
+	}
+
+	return &userpb.UserResponse{
+		User: h.toUserPb(u),
+	}, nil
+}
+
+func (h *Handler) UpdateUser(ctx context.Context, req *userpb.UpdateUser) (*userpb.UserResponse, error) {
+	lType := config.GetEnv("LOGIN_TYPE", "phone")
+	if req.GetUsername() == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "username is required")
+	}
+	u, err := h.service.GetByUsername(req.Username)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to found user: %v", err)
+	}
+	u.FirstName = req.GetFirstName()
+	u.LastName = req.GetLastName()
+	u.ProfileImage = req.GetProfileImage()
+	u.Username = req.GetUsername()
+	// u.Password = req.GetPassword()
+	if req.GetRoles() != nil {
+		for _, r := range req.GetRoles() {
+			roleID, err := primitive.ObjectIDFromHex(r)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "invalid role ID: %v", err)
+			}
+			role, err := h.getRoleByID(roleID)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to find role: %v", err)
+			}
+			u.Roles = append(u.Roles, role.ID)
+		}
+	}
+
+	switch lType {
+	case "phone":
+		u.Email = req.GetEmail()
+	case "email":
+		u.PhoneNumber = req.GetPhoneNumber()
+	case "both":
+
+	}
+
+	if err := h.service.Update(u); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to reset password user: %v", err)
 	}
 
 	return &userpb.UserResponse{

@@ -9,4 +9,5 @@ type UserService interface {
 	Update(user *User) error
 	Delete(id any) error
 	ListAll() (Users, error)
+	ResetPassword(user *User, currentPassword, password, rePassword string) error
 }

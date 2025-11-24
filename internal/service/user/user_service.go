@@ -70,3 +70,14 @@ func (s *userService) Delete(id any) error {
 func (s *userService) ListAll() (user.Users, error) {
 	return s.repo.List()
 }
+
+func (s *userService) ResetPassword(user *user.User, currentPassword, password, rePassword string) error {
+	if !util.CheckPasswordHash(user.Password, currentPassword) {
+		return errors.New("password_is_not_ok")
+	}
+	if password != rePassword {
+		return errors.New("password_is_not_matched")
+	}
+	user.Password = util.HashPassword(password)
+	return s.Update(user)
+}
