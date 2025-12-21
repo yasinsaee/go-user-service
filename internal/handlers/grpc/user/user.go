@@ -211,7 +211,17 @@ func (h *Handler) Register(ctx context.Context, req *userpb.RegisterUser) (*user
 		}
 	}
 
-	if err := h.service.Register(u); err != nil {
+	lType := config.GetEnv("LOGIN_TYPE", "phone")
+	username := req.GetUsername()
+	switch lType {
+	case "phone":
+		username = req.GetPhoneNumber()
+	case "email":
+		u.PhoneNumber = req.GetEmail()
+	case "both":
+
+	}
+	if err := h.service.Register(username, u); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to register user: %v", err)
 	}
 

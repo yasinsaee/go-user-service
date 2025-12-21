@@ -2,7 +2,7 @@ package user
 
 // UserService defines business logic operations related to users.
 type UserService interface {
-	Register(user *User) error
+	Register(username string, user *User) error
 	Login(username, password string) (*User, error)
 	GetByID(id any) (*User, error)
 	GetByUsername(username string) (*User, error)

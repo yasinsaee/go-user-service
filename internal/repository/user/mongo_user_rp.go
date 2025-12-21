@@ -35,7 +35,7 @@ func (r *mongoUserRepository) FindByUsername(username string) (*user.User, error
 	query := bson.M{
 		"$or": []bson.M{
 			{"username": username},
-			{"phonenumber": username},
+			{"phone_number": username},
 			{"email": username},
 		},
 	}

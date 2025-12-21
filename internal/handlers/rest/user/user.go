@@ -48,9 +48,9 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return g.CreateErrorResponse(http.StatusBadRequest, err, "invalid request body")
 	}
 
-	if err := h.service.Register(u); err != nil {
-		return g.CreateErrorResponse(http.StatusInternalServerError, err, "cannot save user")
-	}
+	// if err := h.service.Register(u); err != nil {
+	// 	return g.CreateErrorResponse(http.StatusInternalServerError, err, "cannot save user")
+	// }
 
 	return g.CreateSuccessResponse(http.StatusCreated, "user created successfully", echo.Map{
 		"user": u,
