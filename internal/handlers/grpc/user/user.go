@@ -172,7 +172,7 @@ func (h *Handler) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.
 
 	tokenConfig := jwt.TokenConfig{
 		ID:       u.ID.Hex(),
-		Username: u.Username,
+		Username: req.GetUsername(),
 		Roles:    roles,
 		Access:   permissions,
 	}
@@ -245,19 +245,34 @@ func (h *Handler) ResetPassword(ctx context.Context, req *userpb.ResetPasswordUs
 	}, nil
 }
 
-func (h *Handler) UpdateUser(ctx context.Context, req *userpb.UpdateUser) (*userpb.UserResponse, error) {
+func (h *Handler) Update(ctx context.Context, req *userpb.UpdateUser) (*userpb.UserResponse, error) {
+	var (
+		err error
+	)
 	lType := config.GetEnv("LOGIN_TYPE", "phone")
-	if req.GetUsername() == "" {
-		return nil, status.Errorf(codes.InvalidArgument, "username is required")
+	u := new(user.User)
+	switch lType {
+	case "phone":
+		u, err = h.service.GetByUsername(req.GetPhoneNumber())
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to found user: %v", err)
+		}
+	case "email":
+		u, err = h.service.GetByUsername(req.GetEmail())
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to found user: %v", err)
+		}
+	case "username":
+		u, err = h.service.GetByUsername(req.GetUsername())
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to found user: %v", err)
+		}
 	}
-	u, err := h.service.GetByUsername(req.Username)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to found user: %v", err)
-	}
+
 	u.FirstName = req.GetFirstName()
 	u.LastName = req.GetLastName()
 	u.ProfileImage = req.GetProfileImage()
-	u.Username = req.GetUsername()
+	// u.Username = req.GetUsername()
 	// u.Password = req.GetPassword()
 	if req.GetRoles() != nil {
 		for _, r := range req.GetRoles() {
@@ -275,8 +290,13 @@ func (h *Handler) UpdateUser(ctx context.Context, req *userpb.UpdateUser) (*user
 
 	switch lType {
 	case "phone":
+		u.Username = req.GetUsername()
 		u.Email = req.GetEmail()
 	case "email":
+		u.Username = req.GetUsername()
+		u.PhoneNumber = req.GetPhoneNumber()
+	case "username":
+		u.Email = req.GetEmail()
 		u.PhoneNumber = req.GetPhoneNumber()
 	case "both":
 

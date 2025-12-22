@@ -72,7 +72,7 @@ func (s *userService) ListAll() (user.Users, error) {
 }
 
 func (s *userService) ResetPassword(user *user.User, currentPassword, password, rePassword string) error {
-	if !util.CheckPasswordHash(user.Password, currentPassword) {
+	if !util.CheckPasswordHash(currentPassword, user.Password) {
 		return errors.New("password_is_not_ok")
 	}
 	if password != rePassword {
