@@ -11,18 +11,19 @@ type OTPService interface {
 	Update(otp *Otp) error
 	Delete(id any) error
 	ListAll() (Otps, error)
-	Count(bson.M) (int, error)
+	ListByType(otpType OtpType) (Otps, error)
+	Count(q bson.M) (int, error)
 
 	// OTP business logic
 	GenerateCode() string
-	SaveCode(receiver string, code string) error
-	ValidateCode(receiver string, code string) (bool, error)
-	SendCode(receiver string, code string) error
+	SaveCode(receiver string, otpType OtpType, code string) error
+	ValidateCode(receiver string, otpType OtpType, code string) (bool, error)
+	SendCode(receiver string, otpType OtpType, code string) error
 
 	// Rate limiting
 	CanSend(receiver string) (bool, error)
 	MarkSend(receiver string) error
 
-	//Hard limit Check
-	CheckHardLimit(receiver string) (bool, error)
+	// Hard limit Check
+	CheckHardLimit(receiver string, otpType OtpType) (bool, error)
 }

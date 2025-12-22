@@ -30,7 +30,6 @@ func NewOTPService(
 	rateLimiter int,
 	config config.OTPConfig,
 	maxOTPPerReceiver int,
-
 ) otp.OTPService {
 	return &OTPServiceImpl{
 		repo:              repo,
@@ -72,6 +71,10 @@ func (s *OTPServiceImpl) ListAll() (otp.Otps, error) {
 	return s.repo.List()
 }
 
+func (s *OTPServiceImpl) ListByType(otpType otp.OtpType) (otp.Otps, error) {
+	return s.repo.ListByType(otpType)
+}
+
 func (s *OTPServiceImpl) Count(q bson.M) (int, error) {
 	return s.repo.Count(q)
 }
@@ -80,16 +83,17 @@ func (s *OTPServiceImpl) Count(q bson.M) (int, error) {
 // Business Logic
 //
 
-// GenerateCode creates a 6-digit numeric OTP code.
+// GenerateCode creates a numeric OTP code.
 func (s *OTPServiceImpl) GenerateCode() string {
 	return otp.GenerateCode(s.config.Length, s.config.Charset)
 }
 
-// SaveCode stores the OTP in the database
-func (s *OTPServiceImpl) SaveCode(receiver string, code string) error {
+// SaveCode stores the OTP in the database with type.
+func (s *OTPServiceImpl) SaveCode(receiver string, otpType otp.OtpType, code string) error {
 	o := &otp.Otp{
 		Receiver:  receiver,
 		Code:      code,
+		Type:      otpType,
 		Used:      false,
 		SendAt:    time.Now().UTC(),
 		ExpiresAt: time.Now().UTC().Add(s.codeTTL),
@@ -99,13 +103,13 @@ func (s *OTPServiceImpl) SaveCode(receiver string, code string) error {
 	return s.repo.Create(o)
 }
 
-// ValidateCode checks whether code is valid, not expired, and not used.
-func (s *OTPServiceImpl) ValidateCode(receiver string, code string) (bool, error) {
-	record, err := s.repo.FindByReceiverAndCode(receiver, code)
+// ValidateCode checks whether code is valid for a given type, not expired, and not used.
+func (s *OTPServiceImpl) ValidateCode(receiver string, otpType otp.OtpType, code string) (bool, error) {
+	record, err := s.repo.FindByReceiverAndCodeAndType(receiver, code, otpType)
 	if err != nil {
 		return false, err
 	}
-	if (record == &otp.Otp{} || record == nil) {
+	if record == nil {
 		return false, errors.New("otp not found")
 	}
 	if record.ExpiresAt.Before(time.Now().UTC()) {
@@ -114,22 +118,19 @@ func (s *OTPServiceImpl) ValidateCode(receiver string, code string) (bool, error
 	if record.Used {
 		return false, errors.New("otp used already")
 	}
-	if record.Code != code {
-		return false, errors.New("invalid code")
-	}
 
-	// Mark only this OTP as used
+	// Mark OTP as used
 	record.Used = true
 	if err := s.repo.Update(record); err != nil {
-		return false, errors.New("cannot update otp as used")
+		return false, errors.New("cannot mark otp as used")
 	}
 
 	_ = s.repo.DeleteExpiredOtps()
 	return true, nil
 }
 
-// SendCode delivers the OTP using provider (SMS, Email, ...)
-func (s *OTPServiceImpl) SendCode(receiver string, code string) error {
+// SendCode delivers the OTP using provider (SMS, Email, ...) for a given type
+func (s *OTPServiceImpl) SendCode(receiver string, otpType otp.OtpType, code string) error {
 	ok, err := s.CanSend(receiver)
 	if err != nil {
 		return err
@@ -171,14 +172,13 @@ func (s *OTPServiceImpl) MarkSend(receiver string) error {
 	return s.limiter.MarkSend(receiver, s.codeTTL)
 }
 
-// Hard limit Check
-func (s *OTPServiceImpl) CheckHardLimit(receiver string) (bool, error) {
+// Hard limit Check by receiver and type
+func (s *OTPServiceImpl) CheckHardLimit(receiver string, otpType otp.OtpType) (bool, error) {
 	if s.maxOTPPerReceiver > 0 {
-		count, _ := s.Count(bson.M{"receiver": receiver})
+		count, _ := s.Count(bson.M{"receiver": receiver, "type": otpType})
 		if count >= s.maxOTPPerReceiver {
 			return false, errors.New("too many OTP requests, contact support")
 		}
 	}
-
 	return true, nil
 }

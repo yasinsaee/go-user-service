@@ -21,14 +21,65 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// OTP type enum
+type OTPType int32
+
+const (
+	OTPType_FORGOT_PASSWORD    OTPType = 0
+	OTPType_REGISTER           OTPType = 1
+	OTPType_EMAIL_VERIFICATION OTPType = 2
+)
+
+// Enum value maps for OTPType.
+var (
+	OTPType_name = map[int32]string{
+		0: "FORGOT_PASSWORD",
+		1: "REGISTER",
+		2: "EMAIL_VERIFICATION",
+	}
+	OTPType_value = map[string]int32{
+		"FORGOT_PASSWORD":    0,
+		"REGISTER":           1,
+		"EMAIL_VERIFICATION": 2,
+	}
+)
+
+func (x OTPType) Enum() *OTPType {
+	p := new(OTPType)
+	*p = x
+	return p
+}
+
+func (x OTPType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OTPType) Descriptor() protoreflect.EnumDescriptor {
+	return file_user_service_otp_otp_proto_enumTypes[0].Descriptor()
+}
+
+func (OTPType) Type() protoreflect.EnumType {
+	return &file_user_service_otp_otp_proto_enumTypes[0]
+}
+
+func (x OTPType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OTPType.Descriptor instead.
+func (OTPType) EnumDescriptor() ([]byte, []int) {
+	return file_user_service_otp_otp_proto_rawDescGZIP(), []int{0}
+}
+
 // OTP structure
 type OTP struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Receiver      string                 `protobuf:"bytes,2,opt,name=receiver,proto3" json:"receiver,omitempty"` // شماره موبایل یا ایمیل
+	Receiver      string                 `protobuf:"bytes,2,opt,name=receiver,proto3" json:"receiver,omitempty"`
 	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
 	ExpiresAt     int64                  `protobuf:"varint,4,opt,name=expiresAt,proto3" json:"expiresAt,omitempty"`
 	Used          bool                   `protobuf:"varint,5,opt,name=used,proto3" json:"used,omitempty"`
+	Type          OTPType                `protobuf:"varint,6,opt,name=type,proto3,enum=otp.OTPType" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -98,12 +149,20 @@ func (x *OTP) GetUsed() bool {
 	return false
 }
 
+func (x *OTP) GetType() OTPType {
+	if x != nil {
+		return x.Type
+	}
+	return OTPType_FORGOT_PASSWORD
+}
+
 // CRUD
 type CreateOTPRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Receiver      string                 `protobuf:"bytes,1,opt,name=receiver,proto3" json:"receiver,omitempty"`
 	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
-	TtlSeconds    int32                  `protobuf:"varint,3,opt,name=ttlSeconds,proto3" json:"ttlSeconds,omitempty"`
+	Type          OTPType                `protobuf:"varint,3,opt,name=type,proto3,enum=otp.OTPType" json:"type,omitempty"`
+	TtlSeconds    int32                  `protobuf:"varint,4,opt,name=ttlSeconds,proto3" json:"ttlSeconds,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -150,6 +209,13 @@ func (x *CreateOTPRequest) GetCode() string {
 		return x.Code
 	}
 	return ""
+}
+
+func (x *CreateOTPRequest) GetType() OTPType {
+	if x != nil {
+		return x.Type
+	}
+	return OTPType_FORGOT_PASSWORD
 }
 
 func (x *CreateOTPRequest) GetTtlSeconds() int32 {
@@ -209,6 +275,7 @@ type UpdateOTPRequest struct {
 	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	TtlSeconds    int32                  `protobuf:"varint,3,opt,name=ttlSeconds,proto3" json:"ttlSeconds,omitempty"`
 	Used          bool                   `protobuf:"varint,4,opt,name=used,proto3" json:"used,omitempty"`
+	Type          OTPType                `protobuf:"varint,5,opt,name=type,proto3,enum=otp.OTPType" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -269,6 +336,13 @@ func (x *UpdateOTPRequest) GetUsed() bool {
 		return x.Used
 	}
 	return false
+}
+
+func (x *UpdateOTPRequest) GetType() OTPType {
+	if x != nil {
+		return x.Type
+	}
+	return OTPType_FORGOT_PASSWORD
 }
 
 type UpdateOTPResponse struct {
@@ -574,8 +648,9 @@ func (x *ListOTPsResponse) GetOtps() []*OTP {
 // Business Logic (Request / Validate OTP)
 type RequestOTPRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Receiver      string                 `protobuf:"bytes,1,opt,name=receiver,proto3" json:"receiver,omitempty"` // شماره موبایل یا ایمیل
-	TtlSeconds    int32                  `protobuf:"varint,2,opt,name=ttlSeconds,proto3" json:"ttlSeconds,omitempty"`
+	Receiver      string                 `protobuf:"bytes,1,opt,name=receiver,proto3" json:"receiver,omitempty"`
+	Type          OTPType                `protobuf:"varint,2,opt,name=type,proto3,enum=otp.OTPType" json:"type,omitempty"`
+	TtlSeconds    int32                  `protobuf:"varint,3,opt,name=ttlSeconds,proto3" json:"ttlSeconds,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -615,6 +690,13 @@ func (x *RequestOTPRequest) GetReceiver() string {
 		return x.Receiver
 	}
 	return ""
+}
+
+func (x *RequestOTPRequest) GetType() OTPType {
+	if x != nil {
+		return x.Type
+	}
+	return OTPType_FORGOT_PASSWORD
 }
 
 func (x *RequestOTPRequest) GetTtlSeconds() int32 {
@@ -672,6 +754,7 @@ type ValidateOTPRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Receiver      string                 `protobuf:"bytes,1,opt,name=receiver,proto3" json:"receiver,omitempty"`
 	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	Type          OTPType                `protobuf:"varint,3,opt,name=type,proto3,enum=otp.OTPType" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -718,6 +801,13 @@ func (x *ValidateOTPRequest) GetCode() string {
 		return x.Code
 	}
 	return ""
+}
+
+func (x *ValidateOTPRequest) GetType() OTPType {
+	if x != nil {
+		return x.Type
+	}
+	return OTPType_FORGOT_PASSWORD
 }
 
 type ValidateOTPResponse struct {
@@ -768,28 +858,31 @@ var File_user_service_otp_otp_proto protoreflect.FileDescriptor
 
 const file_user_service_otp_otp_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser-service/otp/otp.proto\x12\x03otp\"w\n" +
+	"\x1auser-service/otp/otp.proto\x12\x03otp\"\x99\x01\n" +
 	"\x03OTP\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
 	"\breceiver\x18\x02 \x01(\tR\breceiver\x12\x12\n" +
 	"\x04code\x18\x03 \x01(\tR\x04code\x12\x1c\n" +
 	"\texpiresAt\x18\x04 \x01(\x03R\texpiresAt\x12\x12\n" +
-	"\x04used\x18\x05 \x01(\bR\x04used\"b\n" +
+	"\x04used\x18\x05 \x01(\bR\x04used\x12 \n" +
+	"\x04type\x18\x06 \x01(\x0e2\f.otp.OTPTypeR\x04type\"\x84\x01\n" +
 	"\x10CreateOTPRequest\x12\x1a\n" +
 	"\breceiver\x18\x01 \x01(\tR\breceiver\x12\x12\n" +
-	"\x04code\x18\x02 \x01(\tR\x04code\x12\x1e\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\x12 \n" +
+	"\x04type\x18\x03 \x01(\x0e2\f.otp.OTPTypeR\x04type\x12\x1e\n" +
 	"\n" +
-	"ttlSeconds\x18\x03 \x01(\x05R\n" +
+	"ttlSeconds\x18\x04 \x01(\x05R\n" +
 	"ttlSeconds\"/\n" +
 	"\x11CreateOTPResponse\x12\x1a\n" +
-	"\x03otp\x18\x01 \x01(\v2\b.otp.OTPR\x03otp\"j\n" +
+	"\x03otp\x18\x01 \x01(\v2\b.otp.OTPR\x03otp\"\x8c\x01\n" +
 	"\x10UpdateOTPRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04code\x18\x02 \x01(\tR\x04code\x12\x1e\n" +
 	"\n" +
 	"ttlSeconds\x18\x03 \x01(\x05R\n" +
 	"ttlSeconds\x12\x12\n" +
-	"\x04used\x18\x04 \x01(\bR\x04used\"/\n" +
+	"\x04used\x18\x04 \x01(\bR\x04used\x12 \n" +
+	"\x04type\x18\x05 \x01(\x0e2\f.otp.OTPTypeR\x04type\"/\n" +
 	"\x11UpdateOTPResponse\x12\x1a\n" +
 	"\x03otp\x18\x01 \x01(\v2\b.otp.OTPR\x03otp\"\"\n" +
 	"\x10DeleteOTPRequest\x12\x0e\n" +
@@ -802,19 +895,25 @@ const file_user_service_otp_otp_proto_rawDesc = "" +
 	"\x03otp\x18\x01 \x01(\v2\b.otp.OTPR\x03otp\"\x11\n" +
 	"\x0fListOTPsRequest\"0\n" +
 	"\x10ListOTPsResponse\x12\x1c\n" +
-	"\x04otps\x18\x01 \x03(\v2\b.otp.OTPR\x04otps\"O\n" +
+	"\x04otps\x18\x01 \x03(\v2\b.otp.OTPR\x04otps\"q\n" +
 	"\x11RequestOTPRequest\x12\x1a\n" +
-	"\breceiver\x18\x01 \x01(\tR\breceiver\x12\x1e\n" +
+	"\breceiver\x18\x01 \x01(\tR\breceiver\x12 \n" +
+	"\x04type\x18\x02 \x01(\x0e2\f.otp.OTPTypeR\x04type\x12\x1e\n" +
 	"\n" +
-	"ttlSeconds\x18\x02 \x01(\x05R\n" +
+	"ttlSeconds\x18\x03 \x01(\x05R\n" +
 	"ttlSeconds\".\n" +
 	"\x12RequestOTPResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"D\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"f\n" +
 	"\x12ValidateOTPRequest\x12\x1a\n" +
 	"\breceiver\x18\x01 \x01(\tR\breceiver\x12\x12\n" +
-	"\x04code\x18\x02 \x01(\tR\x04code\"+\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\x12 \n" +
+	"\x04type\x18\x03 \x01(\x0e2\f.otp.OTPTypeR\x04type\"+\n" +
 	"\x13ValidateOTPResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid2\xad\x03\n" +
+	"\x05valid\x18\x01 \x01(\bR\x05valid*D\n" +
+	"\aOTPType\x12\x13\n" +
+	"\x0fFORGOT_PASSWORD\x10\x00\x12\f\n" +
+	"\bREGISTER\x10\x01\x12\x16\n" +
+	"\x12EMAIL_VERIFICATION\x10\x022\xad\x03\n" +
 	"\n" +
 	"OTPService\x12:\n" +
 	"\tCreateOTP\x12\x15.otp.CreateOTPRequest\x1a\x16.otp.CreateOTPResponse\x12:\n" +
@@ -838,48 +937,55 @@ func file_user_service_otp_otp_proto_rawDescGZIP() []byte {
 	return file_user_service_otp_otp_proto_rawDescData
 }
 
+var file_user_service_otp_otp_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_user_service_otp_otp_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_user_service_otp_otp_proto_goTypes = []any{
-	(*OTP)(nil),                 // 0: otp.OTP
-	(*CreateOTPRequest)(nil),    // 1: otp.CreateOTPRequest
-	(*CreateOTPResponse)(nil),   // 2: otp.CreateOTPResponse
-	(*UpdateOTPRequest)(nil),    // 3: otp.UpdateOTPRequest
-	(*UpdateOTPResponse)(nil),   // 4: otp.UpdateOTPResponse
-	(*DeleteOTPRequest)(nil),    // 5: otp.DeleteOTPRequest
-	(*DeleteOTPResponse)(nil),   // 6: otp.DeleteOTPResponse
-	(*GetOTPRequest)(nil),       // 7: otp.GetOTPRequest
-	(*GetOTPResponse)(nil),      // 8: otp.GetOTPResponse
-	(*ListOTPsRequest)(nil),     // 9: otp.ListOTPsRequest
-	(*ListOTPsResponse)(nil),    // 10: otp.ListOTPsResponse
-	(*RequestOTPRequest)(nil),   // 11: otp.RequestOTPRequest
-	(*RequestOTPResponse)(nil),  // 12: otp.RequestOTPResponse
-	(*ValidateOTPRequest)(nil),  // 13: otp.ValidateOTPRequest
-	(*ValidateOTPResponse)(nil), // 14: otp.ValidateOTPResponse
+	(OTPType)(0),                // 0: otp.OTPType
+	(*OTP)(nil),                 // 1: otp.OTP
+	(*CreateOTPRequest)(nil),    // 2: otp.CreateOTPRequest
+	(*CreateOTPResponse)(nil),   // 3: otp.CreateOTPResponse
+	(*UpdateOTPRequest)(nil),    // 4: otp.UpdateOTPRequest
+	(*UpdateOTPResponse)(nil),   // 5: otp.UpdateOTPResponse
+	(*DeleteOTPRequest)(nil),    // 6: otp.DeleteOTPRequest
+	(*DeleteOTPResponse)(nil),   // 7: otp.DeleteOTPResponse
+	(*GetOTPRequest)(nil),       // 8: otp.GetOTPRequest
+	(*GetOTPResponse)(nil),      // 9: otp.GetOTPResponse
+	(*ListOTPsRequest)(nil),     // 10: otp.ListOTPsRequest
+	(*ListOTPsResponse)(nil),    // 11: otp.ListOTPsResponse
+	(*RequestOTPRequest)(nil),   // 12: otp.RequestOTPRequest
+	(*RequestOTPResponse)(nil),  // 13: otp.RequestOTPResponse
+	(*ValidateOTPRequest)(nil),  // 14: otp.ValidateOTPRequest
+	(*ValidateOTPResponse)(nil), // 15: otp.ValidateOTPResponse
 }
 var file_user_service_otp_otp_proto_depIdxs = []int32{
-	0,  // 0: otp.CreateOTPResponse.otp:type_name -> otp.OTP
-	0,  // 1: otp.UpdateOTPResponse.otp:type_name -> otp.OTP
-	0,  // 2: otp.GetOTPResponse.otp:type_name -> otp.OTP
-	0,  // 3: otp.ListOTPsResponse.otps:type_name -> otp.OTP
-	1,  // 4: otp.OTPService.CreateOTP:input_type -> otp.CreateOTPRequest
-	3,  // 5: otp.OTPService.UpdateOTP:input_type -> otp.UpdateOTPRequest
-	5,  // 6: otp.OTPService.DeleteOTP:input_type -> otp.DeleteOTPRequest
-	7,  // 7: otp.OTPService.GetOTP:input_type -> otp.GetOTPRequest
-	9,  // 8: otp.OTPService.ListOTPs:input_type -> otp.ListOTPsRequest
-	11, // 9: otp.OTPService.RequestOTP:input_type -> otp.RequestOTPRequest
-	13, // 10: otp.OTPService.ValidateOTP:input_type -> otp.ValidateOTPRequest
-	2,  // 11: otp.OTPService.CreateOTP:output_type -> otp.CreateOTPResponse
-	4,  // 12: otp.OTPService.UpdateOTP:output_type -> otp.UpdateOTPResponse
-	6,  // 13: otp.OTPService.DeleteOTP:output_type -> otp.DeleteOTPResponse
-	8,  // 14: otp.OTPService.GetOTP:output_type -> otp.GetOTPResponse
-	10, // 15: otp.OTPService.ListOTPs:output_type -> otp.ListOTPsResponse
-	12, // 16: otp.OTPService.RequestOTP:output_type -> otp.RequestOTPResponse
-	14, // 17: otp.OTPService.ValidateOTP:output_type -> otp.ValidateOTPResponse
-	11, // [11:18] is the sub-list for method output_type
-	4,  // [4:11] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	0,  // 0: otp.OTP.type:type_name -> otp.OTPType
+	0,  // 1: otp.CreateOTPRequest.type:type_name -> otp.OTPType
+	1,  // 2: otp.CreateOTPResponse.otp:type_name -> otp.OTP
+	0,  // 3: otp.UpdateOTPRequest.type:type_name -> otp.OTPType
+	1,  // 4: otp.UpdateOTPResponse.otp:type_name -> otp.OTP
+	1,  // 5: otp.GetOTPResponse.otp:type_name -> otp.OTP
+	1,  // 6: otp.ListOTPsResponse.otps:type_name -> otp.OTP
+	0,  // 7: otp.RequestOTPRequest.type:type_name -> otp.OTPType
+	0,  // 8: otp.ValidateOTPRequest.type:type_name -> otp.OTPType
+	2,  // 9: otp.OTPService.CreateOTP:input_type -> otp.CreateOTPRequest
+	4,  // 10: otp.OTPService.UpdateOTP:input_type -> otp.UpdateOTPRequest
+	6,  // 11: otp.OTPService.DeleteOTP:input_type -> otp.DeleteOTPRequest
+	8,  // 12: otp.OTPService.GetOTP:input_type -> otp.GetOTPRequest
+	10, // 13: otp.OTPService.ListOTPs:input_type -> otp.ListOTPsRequest
+	12, // 14: otp.OTPService.RequestOTP:input_type -> otp.RequestOTPRequest
+	14, // 15: otp.OTPService.ValidateOTP:input_type -> otp.ValidateOTPRequest
+	3,  // 16: otp.OTPService.CreateOTP:output_type -> otp.CreateOTPResponse
+	5,  // 17: otp.OTPService.UpdateOTP:output_type -> otp.UpdateOTPResponse
+	7,  // 18: otp.OTPService.DeleteOTP:output_type -> otp.DeleteOTPResponse
+	9,  // 19: otp.OTPService.GetOTP:output_type -> otp.GetOTPResponse
+	11, // 20: otp.OTPService.ListOTPs:output_type -> otp.ListOTPsResponse
+	13, // 21: otp.OTPService.RequestOTP:output_type -> otp.RequestOTPResponse
+	15, // 22: otp.OTPService.ValidateOTP:output_type -> otp.ValidateOTPResponse
+	16, // [16:23] is the sub-list for method output_type
+	9,  // [9:16] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_user_service_otp_otp_proto_init() }
@@ -892,13 +998,14 @@ func file_user_service_otp_otp_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_otp_otp_proto_rawDesc), len(file_user_service_otp_otp_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_user_service_otp_otp_proto_goTypes,
 		DependencyIndexes: file_user_service_otp_otp_proto_depIdxs,
+		EnumInfos:         file_user_service_otp_otp_proto_enumTypes,
 		MessageInfos:      file_user_service_otp_otp_proto_msgTypes,
 	}.Build()
 	File_user_service_otp_otp_proto = out.File

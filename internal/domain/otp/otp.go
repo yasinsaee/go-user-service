@@ -12,6 +12,7 @@ type (
 		Receiver    string             `bson:"receiver" json:"receiver"`
 		Code        string             `bson:"code" json:"code"`
 		Description string             `bson:"description" json:"description"`
+		Type        OtpType            `bson:"type" json:"type"` // نوع OTP
 		Used        bool               `bson:"used" json:"used"`
 		SendAt      time.Time          `bson:"send_at" json:"send_at"`
 		ExpiresAt   time.Time          `bson:"expires_at" json:"expires_at"`

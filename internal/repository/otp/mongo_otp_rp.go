@@ -37,10 +37,36 @@ func (r *mongoOTPRepository) FindByID(id any) (*otp.Otp, error) {
 	return o, err
 }
 
-// FindByName retrieves an OTP by a name field (if your model supports it).
+// FindByName retrieves an OTP by receiver name.
 func (r *mongoOTPRepository) FindByName(name string) (*otp.Otp, error) {
 	o := new(otp.Otp)
-	query := bson.M{"receiver": name}
+	err := mongo2.FindOne(r.collection.Name(), bson.M{"receiver": name}, o)
+	return o, err
+}
+
+// FindByReceiverAndCode for backward compatibility (any type, not used, not expired)
+func (r *mongoOTPRepository) FindByReceiverAndCode(receiver, code string) (*otp.Otp, error) {
+	o := new(otp.Otp)
+	query := bson.M{
+		"receiver":   receiver,
+		"code":       code,
+		"used":       false,
+		"expires_at": bson.M{"$gt": time.Now().UTC()},
+	}
+	err := mongo2.FindOne(r.collection.Name(), query, o)
+	return o, err
+}
+
+// FindByReceiverAndCodeAndType retrieves OTP by receiver, code, type, not used, not expired.
+func (r *mongoOTPRepository) FindByReceiverAndCodeAndType(receiver, code string, otpType otp.OtpType) (*otp.Otp, error) {
+	o := new(otp.Otp)
+	query := bson.M{
+		"receiver":   receiver,
+		"code":       code,
+		"type":       otpType,
+		"used":       false,
+		"expires_at": bson.M{"$gt": time.Now().UTC()},
+	}
 	err := mongo2.FindOne(r.collection.Name(), query, o)
 	return o, err
 }
@@ -72,18 +98,18 @@ func (r *mongoOTPRepository) List() (otp.Otps, error) {
 	return list, nil
 }
 
-func (r *mongoOTPRepository) FindByReceiverAndCode(receiver, code string) (*otp.Otp, error) {
-	o := new(otp.Otp)
-	query := bson.M{
-		"receiver":   receiver,
-		"code":       code,
-		"used":       false,
-		"expires_at": bson.M{"$gt": time.Now().UTC()},
+// ListByType returns all OTPs of a specific type
+func (r *mongoOTPRepository) ListByType(otpType otp.OtpType) (otp.Otps, error) {
+	list := make(otp.Otps, 0)
+	err := mongo2.Find(r.collection.Name(), bson.M{"type": otpType}, &list)
+	if err != nil {
+		logger.Error("error while fetching otps by type:", err.Error())
+		return nil, err
 	}
-	err := mongo2.FindOne(r.collection.Name(), query, o)
-	return o, err
+	return list, nil
 }
 
+// DeleteExpiredOtps removes OTPs that have expired.
 func (r *mongoOTPRepository) DeleteExpiredOtps() error {
 	filter := bson.M{
 		"expires_at": bson.M{"$lt": time.Now().UTC()},
@@ -91,6 +117,7 @@ func (r *mongoOTPRepository) DeleteExpiredOtps() error {
 	return mongo2.RemoveMany(r.collection.Name(), filter)
 }
 
+// Count returns number of OTPs matching a query.
 func (r *mongoOTPRepository) Count(q bson.M) (int, error) {
 	return mongo2.Count(r.collection.Name(), q)
 }

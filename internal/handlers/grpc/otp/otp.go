@@ -105,8 +105,9 @@ func (h *Handler) ListOTPs(ctx context.Context, req *otpPb.ListOTPsRequest) (*ot
 
 func (h *Handler) RequestOTP(ctx context.Context, req *otpPb.RequestOTPRequest) (*otpPb.RequestOTPResponse, error) {
 	receiver := req.GetReceiver()
+	otpType := otp.OtpType(req.GetType())
 
-	ok, err := h.service.CheckHardLimit(receiver)
+	ok, err := h.service.CheckHardLimit(receiver, otpType)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "rate limit error: %v", err)
 	}
@@ -124,12 +125,12 @@ func (h *Handler) RequestOTP(ctx context.Context, req *otpPb.RequestOTPRequest) 
 
 	code := h.service.GenerateCode()
 
-	err = h.service.SaveCode(receiver, code)
+	err = h.service.SaveCode(receiver, otpType, code)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to save otp: %v", err)
 	}
 
-	if err := h.service.SendCode(receiver, code); err != nil {
+	if err := h.service.SendCode(receiver, otpType, code); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to send otp: %v", err)
 	}
 
@@ -139,7 +140,11 @@ func (h *Handler) RequestOTP(ctx context.Context, req *otpPb.RequestOTPRequest) 
 }
 
 func (h *Handler) ValidateOTP(ctx context.Context, req *otpPb.ValidateOTPRequest) (*otpPb.ValidateOTPResponse, error) {
-	ok, err := h.service.ValidateCode(req.GetReceiver(), req.GetCode())
+	receiver := req.GetReceiver()
+	code := req.GetCode()
+	otpType := otp.OtpType(req.GetType())
+
+	ok, err := h.service.ValidateCode(receiver, otpType, code)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -152,6 +157,7 @@ func (h *Handler) ValidateOTP(ctx context.Context, req *otpPb.ValidateOTPRequest
 		Valid: true,
 	}, nil
 }
+
 
 //
 // Helper
