@@ -11,6 +11,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+type TokenType string
+
+const (
+	TokenTypeAccess  TokenType = "access"
+	TokenTypeRefresh TokenType = "refresh"
+)
+
 var (
 	conf            JWTConfig
 	ErrTokenExpired = errors.New("token expired")
@@ -19,10 +26,11 @@ var (
 type (
 	// JWTClaims is a struct that will be encoded to a JWT.
 	JWTClaims struct {
-		ID       string   `json:"id"`
-		Username string   `json:"username"`
-		Roles    []string `json:"roles"`
-		Access   []string `json:"access"`
+		ID       string    `json:"id"`
+		Username string    `json:"username"`
+		Roles    []string  `json:"roles"`
+		Access   []string  `json:"access"`
+		Type     TokenType `json:"type"`
 		jwt.StandardClaims
 	}
 
@@ -38,6 +46,13 @@ type (
 		Roles    []string `json:"roles"`
 		Access   []string `json:"access"`
 	}
+
+	RefreshClaims struct {
+		ID       string    `json:"id"`
+		Username string    `json:"username"`
+		Type     TokenType `json:"type"`
+		jwt.StandardClaims
+	}
 )
 
 type Model interface {
@@ -49,10 +64,60 @@ func Init(config JWTConfig) {
 }
 
 func (t *TokenConfig) GenerateAccessToken() (string, time.Time, error) {
-	// Declare the expiration time of the token - ? hours.
-	expirationTime := time.Now().UTC().Add(time.Hour * time.Duration(conf.Exp))
-	return t.generateToken(expirationTime, []byte(conf.PrivateKey))
+	exp := time.Now().UTC().Add(time.Hour * time.Duration(conf.Exp))
+
+	claims := &JWTClaims{
+		ID:       t.ID,
+		Username: t.Username,
+		Roles:    t.Roles,
+		Access:   t.Access,
+		Type:     TokenTypeAccess,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: exp.Unix(),
+		},
+	}
+
+	return signToken(claims)
 }
+
+
+func (t *TokenConfig) GenerateRefreshToken() (string, time.Time, error) {
+	exp := time.Now().UTC().Add(7 * 24 * time.Hour)
+
+	claims := &RefreshClaims{
+		ID:       t.ID,
+		Username: t.Username,
+		Type:     TokenTypeRefresh,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: exp.Unix(),
+		},
+	}
+
+	return signToken(claims)
+}
+
+func signToken(claims jwt.Claims) (string, time.Time, error) {
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(conf.PrivateKey)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	signed, err := token.SignedString(key)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	switch c := claims.(type) {
+	case *JWTClaims:
+		return signed, time.Unix(c.ExpiresAt, 0), nil
+	case *RefreshClaims:
+		return signed, time.Unix(c.ExpiresAt, 0), nil
+	default:
+		return signed, time.Time{}, nil
+	}
+}
+
 
 func (t *TokenConfig) generateToken(expirationTime time.Time, privateKey []byte) (string, time.Time, error) {
 	claims := &JWTClaims{
@@ -60,6 +125,29 @@ func (t *TokenConfig) generateToken(expirationTime time.Time, privateKey []byte)
 		Username: t.Username,
 		Roles:    t.Roles,
 		Access:   t.Access,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(privateKey)
+	if err != nil {
+		return "", time.Now().UTC(), err
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	tokenString, err := token.SignedString(key)
+	if err != nil {
+		return "", time.Now().UTC(), err
+	}
+
+	return tokenString, expirationTime, nil
+}
+
+func (t *TokenConfig) generateRefreshToken(expirationTime time.Time, privateKey []byte) (string, time.Time, error) {
+	claims := &RefreshClaims{
+		ID:       t.ID,
+		Username: t.Username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -109,6 +197,35 @@ func validation(token string) (*JWTClaims, error) {
 
 	return claims, nil
 }
+
+func ValidateRefreshToken(token string) (*RefreshClaims, error) {
+	token = strings.TrimPrefix(token, "Bearer ")
+
+	claims := &RefreshClaims{}
+
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(conf.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return publicKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if claims.Type != TokenTypeRefresh {
+		return nil, errors.New("invalid token type")
+	}
+
+	if claims.ExpiresAt < time.Now().UTC().Unix() {
+		return nil, ErrTokenExpired
+	}
+
+	return claims, nil
+}
+
 
 func GetPublicKey() (*rsa.PublicKey, error) {
 	return jwt.ParseRSAPublicKeyFromPEM(conf.PublicKey)

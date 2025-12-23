@@ -181,9 +181,15 @@ func (h *Handler) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.
 		return nil, status.Errorf(codes.Internal, "failed to generate token: %v", err)
 	}
 
+	refreshToken, _, err := tokenConfig.GenerateRefreshToken()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to generate refresh token: %v", err)
+	}
+
 	return &userpb.LoginResponse{
-		User:        h.toUserPb(u),
-		AccessToken: accessToken,
+		User:         h.toUserPb(u),
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}, nil
 }
 
@@ -322,5 +328,36 @@ func (h *Handler) UpdatePassword(ctx context.Context, req *userpb.UpdatePassword
 
 	return &userpb.UserResponse{
 		User: h.toUserPb(u),
+	}, nil
+}
+
+func (h *Handler) RefreshToken(ctx context.Context, req *userpb.RefreshTokenRequest) (*userpb.RefreshTokenResponse, error) {
+	claims, err := jwt.ValidateRefreshToken(req.GetRefreshToken())
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid refresh token: %v", err)
+	}
+
+	u, err := h.service.GetByID(claims.ID)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "user_not_found")
+	}
+
+	roles, permissions := h.toUserJwtMeta(u)
+
+	tc := jwt.TokenConfig{
+		ID:       u.ID.Hex(),
+		Username: u.Username,
+		Roles:    roles,
+		Access:   permissions,
+	}
+
+	accessToken, exp, err := tc.GenerateAccessToken()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to generate access token")
+	}
+
+	return &userpb.RefreshTokenResponse{
+		AccessToken: accessToken,
+		ExpiresAt:   timestamppb.New(exp),
 	}, nil
 }
