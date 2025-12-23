@@ -272,7 +272,6 @@ func (h *Handler) Update(ctx context.Context, req *userpb.UpdateUser) (*userpb.U
 	u.FirstName = req.GetFirstName()
 	u.LastName = req.GetLastName()
 	u.ProfileImage = req.GetProfileImage()
-	// u.Username = req.GetUsername()
 	// u.Password = req.GetPassword()
 	if req.GetRoles() != nil {
 		for _, r := range req.GetRoles() {
@@ -303,6 +302,21 @@ func (h *Handler) Update(ctx context.Context, req *userpb.UpdateUser) (*userpb.U
 	}
 
 	if err := h.service.Update(u); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to reset password user: %v", err)
+	}
+
+	return &userpb.UserResponse{
+		User: h.toUserPb(u),
+	}, nil
+}
+
+func (h *Handler) UpdatePassword(ctx context.Context, req *userpb.UpdatePasswordUser) (*userpb.UserResponse, error) {
+	u, err := h.service.GetByUsername(req.GetUsername())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to found user: %v", err)
+	}
+
+	if err := h.service.ResetPassword(u, u.Password, req.GetNewPassword(), req.GetRepeatNewPassword()); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to reset password user: %v", err)
 	}
 

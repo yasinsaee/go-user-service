@@ -698,6 +698,66 @@ func (x *ResetPasswordUser) GetRepeatNewPassword() string {
 	return ""
 }
 
+type UpdatePasswordUser struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Username          string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	NewPassword       string                 `protobuf:"bytes,3,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
+	RepeatNewPassword string                 `protobuf:"bytes,4,opt,name=repeat_new_password,json=repeatNewPassword,proto3" json:"repeat_new_password,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UpdatePasswordUser) Reset() {
+	*x = UpdatePasswordUser{}
+	mi := &file_user_service_user_user_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdatePasswordUser) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdatePasswordUser) ProtoMessage() {}
+
+func (x *UpdatePasswordUser) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_user_user_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdatePasswordUser.ProtoReflect.Descriptor instead.
+func (*UpdatePasswordUser) Descriptor() ([]byte, []int) {
+	return file_user_service_user_user_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *UpdatePasswordUser) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *UpdatePasswordUser) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
+	}
+	return ""
+}
+
+func (x *UpdatePasswordUser) GetRepeatNewPassword() string {
+	if x != nil {
+		return x.RepeatNewPassword
+	}
+	return ""
+}
+
 var File_user_service_user_user_proto protoreflect.FileDescriptor
 
 const file_user_service_user_user_proto_rawDesc = "" +
@@ -767,12 +827,17 @@ const file_user_service_user_user_proto_rawDesc = "" +
 	"\busername\x18\x01 \x01(\tR\busername\x12)\n" +
 	"\x10current_password\x18\x02 \x01(\tR\x0fcurrentPassword\x12!\n" +
 	"\fnew_password\x18\x03 \x01(\tR\vnewPassword\x12.\n" +
-	"\x13repeat_new_password\x18\x04 \x01(\tR\x11repeatNewPassword2\xe1\x01\n" +
+	"\x13repeat_new_password\x18\x04 \x01(\tR\x11repeatNewPassword\"\x83\x01\n" +
+	"\x12UpdatePasswordUser\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\x12!\n" +
+	"\fnew_password\x18\x03 \x01(\tR\vnewPassword\x12.\n" +
+	"\x13repeat_new_password\x18\x04 \x01(\tR\x11repeatNewPassword2\xa1\x02\n" +
 	"\vUserService\x120\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\x122\n" +
 	"\bRegister\x12\x12.user.RegisterUser\x1a\x12.user.UserResponse\x12.\n" +
 	"\x06Update\x12\x10.user.UpdateUser\x1a\x12.user.UserResponse\x12<\n" +
-	"\rResetPassword\x12\x17.user.ResetPasswordUser\x1a\x12.user.UserResponseB\tZ\a/userpbb\x06proto3"
+	"\rResetPassword\x12\x17.user.ResetPasswordUser\x1a\x12.user.UserResponse\x12>\n" +
+	"\x0eUpdatePassword\x12\x18.user.UpdatePasswordUser\x1a\x12.user.UserResponseB\tZ\a/userpbb\x06proto3"
 
 var (
 	file_user_service_user_user_proto_rawDescOnce sync.Once
@@ -786,7 +851,7 @@ func file_user_service_user_user_proto_rawDescGZIP() []byte {
 	return file_user_service_user_user_proto_rawDescData
 }
 
-var file_user_service_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_user_service_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_user_service_user_user_proto_goTypes = []any{
 	(*Permission)(nil),            // 0: user.Permission
 	(*Role)(nil),                  // 1: user.Role
@@ -797,26 +862,29 @@ var file_user_service_user_user_proto_goTypes = []any{
 	(*UserResponse)(nil),          // 6: user.UserResponse
 	(*UpdateUser)(nil),            // 7: user.UpdateUser
 	(*ResetPasswordUser)(nil),     // 8: user.ResetPasswordUser
-	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
+	(*UpdatePasswordUser)(nil),    // 9: user.UpdatePasswordUser
+	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
 }
 var file_user_service_user_user_proto_depIdxs = []int32{
 	0,  // 0: user.Role.permissions:type_name -> user.Permission
 	1,  // 1: user.User.roles:type_name -> user.Role
-	9,  // 2: user.User.created_at:type_name -> google.protobuf.Timestamp
-	9,  // 3: user.User.updated_at:type_name -> google.protobuf.Timestamp
-	9,  // 4: user.User.last_login:type_name -> google.protobuf.Timestamp
+	10, // 2: user.User.created_at:type_name -> google.protobuf.Timestamp
+	10, // 3: user.User.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 4: user.User.last_login:type_name -> google.protobuf.Timestamp
 	2,  // 5: user.LoginResponse.user:type_name -> user.User
 	2,  // 6: user.UserResponse.user:type_name -> user.User
 	3,  // 7: user.UserService.Login:input_type -> user.LoginRequest
 	5,  // 8: user.UserService.Register:input_type -> user.RegisterUser
 	7,  // 9: user.UserService.Update:input_type -> user.UpdateUser
 	8,  // 10: user.UserService.ResetPassword:input_type -> user.ResetPasswordUser
-	4,  // 11: user.UserService.Login:output_type -> user.LoginResponse
-	6,  // 12: user.UserService.Register:output_type -> user.UserResponse
-	6,  // 13: user.UserService.Update:output_type -> user.UserResponse
-	6,  // 14: user.UserService.ResetPassword:output_type -> user.UserResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
+	9,  // 11: user.UserService.UpdatePassword:input_type -> user.UpdatePasswordUser
+	4,  // 12: user.UserService.Login:output_type -> user.LoginResponse
+	6,  // 13: user.UserService.Register:output_type -> user.UserResponse
+	6,  // 14: user.UserService.Update:output_type -> user.UserResponse
+	6,  // 15: user.UserService.ResetPassword:output_type -> user.UserResponse
+	6,  // 16: user.UserService.UpdatePassword:output_type -> user.UserResponse
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -833,7 +901,7 @@ func file_user_service_user_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_user_user_proto_rawDesc), len(file_user_service_user_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
