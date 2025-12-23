@@ -316,7 +316,7 @@ func (h *Handler) UpdatePassword(ctx context.Context, req *userpb.UpdatePassword
 		return nil, status.Errorf(codes.NotFound, "failed to found user: %v", err)
 	}
 
-	if err := h.service.ResetPassword(u, u.Password, req.GetNewPassword(), req.GetRepeatNewPassword()); err != nil {
+	if err := h.service.UpdatePassword(u, req.GetNewPassword(), req.GetRepeatNewPassword()); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to reset password user: %v", err)
 	}
 

@@ -75,6 +75,13 @@ func (s *userService) ResetPassword(user *user.User, currentPassword, password, 
 	if !util.CheckPasswordHash(currentPassword, user.Password) {
 		return errors.New("password_is_not_ok")
 	}
+	if err := s.UpdatePassword(user, password, rePassword); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *userService) UpdatePassword(user *user.User, password, rePassword string) error {
 	if password != rePassword {
 		return errors.New("password_is_not_matched")
 	}
