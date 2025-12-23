@@ -313,7 +313,7 @@ func (h *Handler) Update(ctx context.Context, req *userpb.UpdateUser) (*userpb.U
 func (h *Handler) UpdatePassword(ctx context.Context, req *userpb.UpdatePasswordUser) (*userpb.UserResponse, error) {
 	u, err := h.service.GetByUsername(req.GetUsername())
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to found user: %v", err)
+		return nil, status.Errorf(codes.NotFound, "failed to found user: %v", err)
 	}
 
 	if err := h.service.ResetPassword(u, u.Password, req.GetNewPassword(), req.GetRepeatNewPassword()); err != nil {
