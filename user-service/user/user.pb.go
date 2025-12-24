@@ -805,7 +805,8 @@ func (x *RefreshTokenRequest) GetRefreshToken() string {
 type RefreshTokenResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
-	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -847,11 +848,70 @@ func (x *RefreshTokenResponse) GetAccessToken() string {
 	return ""
 }
 
+func (x *RefreshTokenResponse) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
 func (x *RefreshTokenResponse) GetExpiresAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.ExpiresAt
 	}
 	return nil
+}
+
+type LogoutResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutResponse) Reset() {
+	*x = LogoutResponse{}
+	mi := &file_user_service_user_user_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutResponse) ProtoMessage() {}
+
+func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_user_user_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutResponse.ProtoReflect.Descriptor instead.
+func (*LogoutResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_user_user_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *LogoutResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *LogoutResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_user_service_user_user_proto protoreflect.FileDescriptor
@@ -929,18 +989,23 @@ const file_user_service_user_user_proto_rawDesc = "" +
 	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\x12.\n" +
 	"\x13repeat_new_password\x18\x03 \x01(\tR\x11repeatNewPassword\":\n" +
 	"\x13RefreshTokenRequest\x12#\n" +
-	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"t\n" +
+	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"\x99\x01\n" +
 	"\x14RefreshTokenResponse\x12!\n" +
-	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x129\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
+	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x129\n" +
 	"\n" +
-	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt2\xe8\x02\n" +
+	"expires_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"D\n" +
+	"\x0eLogoutResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xa3\x03\n" +
 	"\vUserService\x120\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\x122\n" +
 	"\bRegister\x12\x12.user.RegisterUser\x1a\x12.user.UserResponse\x12.\n" +
 	"\x06Update\x12\x10.user.UpdateUser\x1a\x12.user.UserResponse\x12<\n" +
 	"\rResetPassword\x12\x17.user.ResetPasswordUser\x1a\x12.user.UserResponse\x12>\n" +
 	"\x0eUpdatePassword\x12\x18.user.UpdatePasswordUser\x1a\x12.user.UserResponse\x12E\n" +
-	"\fRefreshToken\x12\x19.user.RefreshTokenRequest\x1a\x1a.user.RefreshTokenResponseB\tZ\a/userpbb\x06proto3"
+	"\fRefreshToken\x12\x19.user.RefreshTokenRequest\x1a\x1a.user.RefreshTokenResponse\x129\n" +
+	"\x06Logout\x12\x19.user.RefreshTokenRequest\x1a\x14.user.LogoutResponseB\tZ\a/userpbb\x06proto3"
 
 var (
 	file_user_service_user_user_proto_rawDescOnce sync.Once
@@ -954,7 +1019,7 @@ func file_user_service_user_user_proto_rawDescGZIP() []byte {
 	return file_user_service_user_user_proto_rawDescData
 }
 
-var file_user_service_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_user_service_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_user_service_user_user_proto_goTypes = []any{
 	(*Permission)(nil),            // 0: user.Permission
 	(*Role)(nil),                  // 1: user.Role
@@ -968,31 +1033,34 @@ var file_user_service_user_user_proto_goTypes = []any{
 	(*UpdatePasswordUser)(nil),    // 9: user.UpdatePasswordUser
 	(*RefreshTokenRequest)(nil),   // 10: user.RefreshTokenRequest
 	(*RefreshTokenResponse)(nil),  // 11: user.RefreshTokenResponse
-	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
+	(*LogoutResponse)(nil),        // 12: user.LogoutResponse
+	(*timestamppb.Timestamp)(nil), // 13: google.protobuf.Timestamp
 }
 var file_user_service_user_user_proto_depIdxs = []int32{
 	0,  // 0: user.Role.permissions:type_name -> user.Permission
 	1,  // 1: user.User.roles:type_name -> user.Role
-	12, // 2: user.User.created_at:type_name -> google.protobuf.Timestamp
-	12, // 3: user.User.updated_at:type_name -> google.protobuf.Timestamp
-	12, // 4: user.User.last_login:type_name -> google.protobuf.Timestamp
+	13, // 2: user.User.created_at:type_name -> google.protobuf.Timestamp
+	13, // 3: user.User.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 4: user.User.last_login:type_name -> google.protobuf.Timestamp
 	2,  // 5: user.LoginResponse.user:type_name -> user.User
 	2,  // 6: user.UserResponse.user:type_name -> user.User
-	12, // 7: user.RefreshTokenResponse.expires_at:type_name -> google.protobuf.Timestamp
+	13, // 7: user.RefreshTokenResponse.expires_at:type_name -> google.protobuf.Timestamp
 	3,  // 8: user.UserService.Login:input_type -> user.LoginRequest
 	5,  // 9: user.UserService.Register:input_type -> user.RegisterUser
 	7,  // 10: user.UserService.Update:input_type -> user.UpdateUser
 	8,  // 11: user.UserService.ResetPassword:input_type -> user.ResetPasswordUser
 	9,  // 12: user.UserService.UpdatePassword:input_type -> user.UpdatePasswordUser
 	10, // 13: user.UserService.RefreshToken:input_type -> user.RefreshTokenRequest
-	4,  // 14: user.UserService.Login:output_type -> user.LoginResponse
-	6,  // 15: user.UserService.Register:output_type -> user.UserResponse
-	6,  // 16: user.UserService.Update:output_type -> user.UserResponse
-	6,  // 17: user.UserService.ResetPassword:output_type -> user.UserResponse
-	6,  // 18: user.UserService.UpdatePassword:output_type -> user.UserResponse
-	11, // 19: user.UserService.RefreshToken:output_type -> user.RefreshTokenResponse
-	14, // [14:20] is the sub-list for method output_type
-	8,  // [8:14] is the sub-list for method input_type
+	10, // 14: user.UserService.Logout:input_type -> user.RefreshTokenRequest
+	4,  // 15: user.UserService.Login:output_type -> user.LoginResponse
+	6,  // 16: user.UserService.Register:output_type -> user.UserResponse
+	6,  // 17: user.UserService.Update:output_type -> user.UserResponse
+	6,  // 18: user.UserService.ResetPassword:output_type -> user.UserResponse
+	6,  // 19: user.UserService.UpdatePassword:output_type -> user.UserResponse
+	11, // 20: user.UserService.RefreshToken:output_type -> user.RefreshTokenResponse
+	12, // 21: user.UserService.Logout:output_type -> user.LogoutResponse
+	15, // [15:22] is the sub-list for method output_type
+	8,  // [8:15] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -1009,7 +1077,7 @@ func file_user_service_user_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_user_user_proto_rawDesc), len(file_user_service_user_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

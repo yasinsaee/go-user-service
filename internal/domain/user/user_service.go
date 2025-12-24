@@ -11,4 +11,9 @@ type UserService interface {
 	ListAll() (Users, error)
 	ResetPassword(user *User, currentPassword, password, rePassword string) error
 	UpdatePassword(user *User, password, rePassword string) error
+
+	//refresh token methods redis-based
+	StoreRefreshToken(userID string, refreshToken string) error
+	ValidateRefreshToken(userID string, refreshToken string) (bool, error)
+	RevokeRefreshToken(userID string, refreshToken string) error
 }

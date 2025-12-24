@@ -186,6 +186,10 @@ func (h *Handler) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.
 		return nil, status.Errorf(codes.Internal, "failed to generate refresh token: %v", err)
 	}
 
+	if err := h.service.StoreRefreshToken(u.ID.Hex(), refreshToken); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to store refresh token: %v", err)
+	}
+
 	return &userpb.LoginResponse{
 		User:         h.toUserPb(u),
 		AccessToken:  accessToken,
@@ -332,18 +336,31 @@ func (h *Handler) UpdatePassword(ctx context.Context, req *userpb.UpdatePassword
 }
 
 func (h *Handler) RefreshToken(ctx context.Context, req *userpb.RefreshTokenRequest) (*userpb.RefreshTokenResponse, error) {
-	claims, err := jwt.ValidateRefreshToken(req.GetRefreshToken())
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid refresh token: %v", err)
+	refreshToken := req.GetRefreshToken()
+	if refreshToken == "" {
+		return nil, status.Errorf(codes.Unauthenticated, "refresh token is required")
 	}
 
-	u, err := h.service.GetByID(claims.ID)
+	claims, err := jwt.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "user_not_found")
+		return nil, status.Errorf(codes.Unauthenticated, "invalid or expired refresh token")
 	}
 
+	userID := claims.ID
+
+	exists, err := h.service.ValidateRefreshToken(userID, refreshToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "internal server error")
+	}
+	if !exists {
+		return nil, status.Errorf(codes.Unauthenticated, "refresh token has been revoked")
+	}
+
+	u, err := h.service.GetByID(userID)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "user not found")
+	}
 	roles, permissions := h.toUserJwtMeta(u)
-
 	tc := jwt.TokenConfig{
 		ID:       u.ID.Hex(),
 		Username: u.Username,
@@ -351,13 +368,52 @@ func (h *Handler) RefreshToken(ctx context.Context, req *userpb.RefreshTokenRequ
 		Access:   permissions,
 	}
 
-	accessToken, exp, err := tc.GenerateAccessToken()
+	accessToken, accessExpTime, err := tc.GenerateAccessToken()
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to generate access token")
+		return nil, status.Errorf(codes.Internal, "failed to generate token")
+	}
+
+	newRefreshToken, _, err := tc.GenerateRefreshToken()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to generate token")
+	} else {
+		if revokeErr := h.service.RevokeRefreshToken(userID, refreshToken); revokeErr != nil {
+			return nil, status.Errorf(codes.Internal, "failed to generate token")
+		}
+
+		if storeErr := h.service.StoreRefreshToken(userID, newRefreshToken); storeErr != nil {
+			return nil, status.Errorf(codes.Internal, "failed to generate token")
+		}
 	}
 
 	return &userpb.RefreshTokenResponse{
-		AccessToken: accessToken,
-		ExpiresAt:   timestamppb.New(exp),
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+		ExpiresAt:    timestamppb.New(accessExpTime),
+	}, nil
+}
+
+func (h *Handler) Logout(ctx context.Context, req *userpb.RefreshTokenRequest) (*userpb.LogoutResponse, error) {
+	refreshToken := req.GetRefreshToken()
+	if refreshToken == "" {
+		return nil, status.Errorf(codes.Unauthenticated, "refresh token is required")
+	}
+
+	claims, err := jwt.ValidateRefreshToken(refreshToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid or expired refresh token")
+	}
+
+	if err == nil && claims != nil && claims.ID != "" {
+		userID := claims.ID
+
+		if revokeErr := h.service.RevokeRefreshToken(userID, refreshToken); revokeErr != nil {
+			return nil, status.Errorf(codes.Internal, "failed to revoke refresh token: %v", revokeErr)
+		}
+	}
+
+	return &userpb.LogoutResponse{
+		Success: true,
+		Message: "logged out successfully",
 	}, nil
 }

@@ -35,9 +35,10 @@ type (
 	}
 
 	JWTConfig struct {
-		PrivateKey []byte
-		PublicKey  []byte
-		Exp        int
+		PrivateKey      []byte
+		PublicKey       []byte
+		AccessTokenExp  int
+		RefreshTokenExp int
 	}
 
 	TokenConfig struct {
@@ -64,7 +65,7 @@ func Init(config JWTConfig) {
 }
 
 func (t *TokenConfig) GenerateAccessToken() (string, time.Time, error) {
-	exp := time.Now().UTC().Add(time.Hour * time.Duration(conf.Exp))
+	exp := time.Now().UTC().Add(time.Hour * time.Duration(conf.AccessTokenExp))
 
 	claims := &JWTClaims{
 		ID:       t.ID,
@@ -80,10 +81,8 @@ func (t *TokenConfig) GenerateAccessToken() (string, time.Time, error) {
 	return signToken(claims)
 }
 
-
 func (t *TokenConfig) GenerateRefreshToken() (string, time.Time, error) {
-	exp := time.Now().UTC().Add(7 * 24 * time.Hour)
-
+	exp := time.Now().UTC().Add(time.Hour * 24 * time.Duration(conf.RefreshTokenExp	))
 	claims := &RefreshClaims{
 		ID:       t.ID,
 		Username: t.Username,
@@ -117,7 +116,6 @@ func signToken(claims jwt.Claims) (string, time.Time, error) {
 		return signed, time.Time{}, nil
 	}
 }
-
 
 func (t *TokenConfig) generateToken(expirationTime time.Time, privateKey []byte) (string, time.Time, error) {
 	claims := &JWTClaims{
@@ -225,7 +223,6 @@ func ValidateRefreshToken(token string) (*RefreshClaims, error) {
 
 	return claims, nil
 }
-
 
 func GetPublicKey() (*rsa.PublicKey, error) {
 	return jwt.ParseRSAPublicKeyFromPEM(conf.PublicKey)

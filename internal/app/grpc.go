@@ -3,6 +3,7 @@ package app
 import (
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/yasinsaee/go-user-service/internal/app/config"
 	otp_config "github.com/yasinsaee/go-user-service/internal/domain/otp/config"
@@ -20,6 +21,7 @@ import (
 	"github.com/yasinsaee/go-user-service/internal/service/permission"
 	"github.com/yasinsaee/go-user-service/internal/service/role"
 	"github.com/yasinsaee/go-user-service/internal/service/user"
+	user_token_store "github.com/yasinsaee/go-user-service/internal/service/user/redis"
 	"github.com/yasinsaee/go-user-service/pkg/mongo"
 	otppb "github.com/yasinsaee/go-user-service/user-service/otp"
 	permissionpb "github.com/yasinsaee/go-user-service/user-service/permission"
@@ -49,13 +51,18 @@ func StartGRPCServer() {
 
 	//otp config
 	otpConfig := otp_config.LoadOTPConfig()
+
+	//redis-based
 	////rate limiter
 	rateLimiter := ratelimiter.NewRedisOTPRateLimiter(int(otpConfig.RateLimit))
+	////token store
+	refreshExp, _ := strconv.Atoi(config.GetEnv("JWT_REFRESH_TOKEN_EXP", ""))
+	tokenStore := user_token_store.NewRefreshTokenStore(int64(refreshExp))
 
 	//services
 	permissionService := permission.NewPermissionService(permissionRepo)
 	roleService := role.NewRoleService(roleRepo)
-	userService := user.NewUserService(userRepo)
+	userService := user.NewUserService(userRepo, tokenStore)
 	otpService := otp.NewOTPService(otpRepo, provider, rateLimiter, otpConfig.TTL, otpConfig.RateLimit, otpConfig, otpConfig.MaxOTPPerReceiver)
 
 	//handlers

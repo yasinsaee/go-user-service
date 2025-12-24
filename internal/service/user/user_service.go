@@ -9,13 +9,15 @@ import (
 )
 
 type userService struct {
-	repo user.UserRepository
+	repo       user.UserRepository
+	tokenStore user.RefreshTokenStore // Redis-based limiter
 }
 
 // NewUserService returns a new instance of UserService.
-func NewUserService(repo user.UserRepository) user.UserService {
+func NewUserService(repo user.UserRepository, tokenStore user.RefreshTokenStore) user.UserService {
 	return &userService{
-		repo: repo,
+		repo:       repo,
+		tokenStore: tokenStore,
 	}
 }
 
@@ -87,4 +89,16 @@ func (s *userService) UpdatePassword(user *user.User, password, rePassword strin
 	}
 	user.Password = util.HashPassword(password)
 	return s.Update(user)
+}
+
+func (s *userService) StoreRefreshToken(userID string, refreshToken string) error {
+	return s.tokenStore.Set(userID, refreshToken)
+}
+
+func (s *userService) ValidateRefreshToken(userID string, refreshToken string) (bool, error) {
+	return s.tokenStore.Exists(userID, refreshToken)
+}
+
+func (s *userService) RevokeRefreshToken(userID string, refreshToken string) error {
+	return s.tokenStore.Delete(userID, refreshToken)
 }
