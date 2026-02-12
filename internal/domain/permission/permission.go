@@ -8,6 +8,7 @@ import (
 
 type Permission struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Key         string             `bson:"key" json:"key"`
 	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description,omitempty" json:"description,omitempty"`
 	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`

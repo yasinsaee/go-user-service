@@ -23,6 +23,7 @@ func (h *Handler) CreatePermission(ctx context.Context, req *permissionpb.Create
 	p := &permission.Permission{
 		Name:        req.GetName(),
 		Description: req.GetDescription(),
+		Key:         req.GetKey(),
 	}
 
 	err := h.service.Create(p)
@@ -35,6 +36,7 @@ func (h *Handler) CreatePermission(ctx context.Context, req *permissionpb.Create
 			Id:          p.ID.Hex(),
 			Name:        p.Name,
 			Description: p.Description,
+			Key:         p.Key,
 		},
 	}, nil
 }
@@ -56,6 +58,9 @@ func (h *Handler) UpdatePermission(ctx context.Context, req *permissionpb.Update
 	if desc := req.GetDescription(); desc != "" {
 		per.Description = desc
 	}
+	if ky := req.GetKey(); ky != "" {
+		per.Key = ky
+	}
 
 	if err := h.service.Update(per); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update permission: %v", err)
@@ -66,6 +71,7 @@ func (h *Handler) UpdatePermission(ctx context.Context, req *permissionpb.Update
 			Id:          per.ID.Hex(),
 			Name:        per.Name,
 			Description: per.Description,
+			Key:         per.Key,
 		},
 	}, nil
 }
@@ -86,6 +92,7 @@ func (h *Handler) GetPermission(ctx context.Context, req *permissionpb.GetPermis
 			Id:          p.ID.Hex(),
 			Name:        p.Name,
 			Description: p.Description,
+			Key:         p.Key,
 		},
 	}, nil
 }
@@ -102,6 +109,7 @@ func (h *Handler) ListPermissions(ctx context.Context, req *permissionpb.ListPer
 			Id:          p.ID.Hex(),
 			Name:        p.Name,
 			Description: p.Description,
+			Key:         p.Key,
 		})
 	}
 

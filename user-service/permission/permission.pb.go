@@ -26,6 +26,7 @@ type Permission struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Key           string                 `protobuf:"bytes,4,opt,name=key,proto3" json:"key,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -77,6 +78,13 @@ func (x *Permission) GetName() string {
 func (x *Permission) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *Permission) GetKey() string {
+	if x != nil {
+		return x.Key
 	}
 	return ""
 }
@@ -173,6 +181,7 @@ type CreatePermissionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Key           string                 `protobuf:"bytes,3,opt,name=key,proto3" json:"key,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -217,6 +226,13 @@ func (x *CreatePermissionRequest) GetName() string {
 func (x *CreatePermissionRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *CreatePermissionRequest) GetKey() string {
+	if x != nil {
+		return x.Key
 	}
 	return ""
 }
@@ -270,6 +286,7 @@ type UpdatePermissionRequest struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Key           string                 `protobuf:"bytes,4,opt,name=key,proto3" json:"key,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -321,6 +338,13 @@ func (x *UpdatePermissionRequest) GetName() string {
 func (x *UpdatePermissionRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdatePermissionRequest) GetKey() string {
+	if x != nil {
+		return x.Key
 	}
 	return ""
 }
@@ -542,29 +566,32 @@ var File_user_service_permission_permission_proto protoreflect.FileDescriptor
 const file_user_service_permission_permission_proto_rawDesc = "" +
 	"\n" +
 	"(user-service/permission/permission.proto\x12\n" +
-	"permission\"R\n" +
+	"permission\"d\n" +
 	"\n" +
 	"Permission\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"&\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x10\n" +
+	"\x03key\x18\x04 \x01(\tR\x03key\"&\n" +
 	"\x14GetPermissionRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"O\n" +
 	"\x15GetPermissionResponse\x126\n" +
 	"\n" +
 	"permission\x18\x01 \x01(\v2\x16.permission.PermissionR\n" +
-	"permission\"O\n" +
+	"permission\"a\n" +
 	"\x17CreatePermissionRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\"R\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
+	"\x03key\x18\x03 \x01(\tR\x03key\"R\n" +
 	"\x18CreatePermissionResponse\x126\n" +
 	"\n" +
 	"permission\x18\x01 \x01(\v2\x16.permission.PermissionR\n" +
-	"permission\"_\n" +
+	"permission\"q\n" +
 	"\x17UpdatePermissionRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"R\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x10\n" +
+	"\x03key\x18\x04 \x01(\tR\x03key\"R\n" +
 	"\x18UpdatePermissionResponse\x126\n" +
 	"\n" +
 	"permission\x18\x01 \x01(\v2\x16.permission.PermissionR\n" +
