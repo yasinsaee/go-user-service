@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/yasinsaee/go-user-service/internal/context"
 	"github.com/yasinsaee/go-user-service/internal/domain/user"
 	"github.com/yasinsaee/go-user-service/pkg/util"
 )
@@ -66,7 +67,7 @@ func (s *userService) Update(user *user.User) error {
 }
 
 func (s *userService) Delete(id any) error {
-	return s.repo.Delete(id)
+	return s.repo.SoftDelete(id)
 }
 
 func (s *userService) ListAll() (user.Users, error) {
@@ -101,4 +102,62 @@ func (s *userService) ValidateRefreshToken(userID string, refreshToken string) (
 
 func (s *userService) RevokeRefreshToken(userID string, refreshToken string) error {
 	return s.tokenStore.Delete(userID, refreshToken)
+}
+
+func (s *userService) Count(q user.UserFilter) (int, error) {
+	return s.repo.Count(q)
+}
+
+func (s *userService) PaginationList(metaData context.MetaData, q user.UserFilter) (context.MetaData, user.Users, error) {
+	totalCount, err := s.Count(q)
+	if err != nil {
+		return metaData, nil, err
+	}
+
+	totalPages := 0
+	if metaData.Limit > 0 {
+		totalPages = totalCount / metaData.Limit
+		if totalCount%metaData.Limit != 0 {
+			totalPages++
+		}
+	}
+
+	if metaData.CurrentPage < 1 {
+		metaData.CurrentPage = 1
+	} else if metaData.CurrentPage > totalPages && totalPages > 0 {
+		metaData.CurrentPage = totalPages
+	}
+
+	nextPage := 0
+	if metaData.CurrentPage < totalPages {
+		nextPage = metaData.CurrentPage + 1
+	}
+
+	metaData.TotalCounts = totalCount
+	metaData.TotalPages = totalPages
+	metaData.NextPage = nextPage
+
+	cats, err := s.repo.PaginationList(metaData, q)
+	if err != nil {
+		return metaData, nil, err
+	}
+
+	return metaData, cats, nil
+}
+
+func (s *userService) BanUser(id string) (*user.User, error) {
+	var (
+		err error
+	)
+	usr := new(user.User)
+	if usr, err = s.GetByID(id); err != nil {
+		return nil, err
+	}
+
+	usr.IsBanned = !usr.IsBanned
+	usr.BannedAt = time.Now().UTC()
+	if err = s.Update(usr); err != nil {
+		return nil, err
+	}
+	return usr, nil
 }

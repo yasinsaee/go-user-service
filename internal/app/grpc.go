@@ -8,14 +8,17 @@ import (
 	"github.com/yasinsaee/go-user-service/internal/app/config"
 	otp_config "github.com/yasinsaee/go-user-service/internal/domain/otp/config"
 	"github.com/yasinsaee/go-user-service/internal/domain/otp/providers"
+	groupgrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/group"
 	otpgrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/otp"
 	permissiongrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/permission"
 	rolegrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/role"
 	usergrpc "github.com/yasinsaee/go-user-service/internal/handlers/grpc/user"
+	repository_group "github.com/yasinsaee/go-user-service/internal/repository/group"
 	repository_otp "github.com/yasinsaee/go-user-service/internal/repository/otp"
 	repository_permission "github.com/yasinsaee/go-user-service/internal/repository/permission"
 	repository_role "github.com/yasinsaee/go-user-service/internal/repository/role"
 	repository_user "github.com/yasinsaee/go-user-service/internal/repository/user"
+	"github.com/yasinsaee/go-user-service/internal/service/group"
 	"github.com/yasinsaee/go-user-service/internal/service/otp"
 	ratelimiter "github.com/yasinsaee/go-user-service/internal/service/otp/redis"
 	"github.com/yasinsaee/go-user-service/internal/service/permission"
@@ -23,6 +26,7 @@ import (
 	"github.com/yasinsaee/go-user-service/internal/service/user"
 	user_token_store "github.com/yasinsaee/go-user-service/internal/service/user/redis"
 	"github.com/yasinsaee/go-user-service/pkg/mongo"
+	grouppb "github.com/yasinsaee/go-user-service/user-service/group"
 	otppb "github.com/yasinsaee/go-user-service/user-service/otp"
 	permissionpb "github.com/yasinsaee/go-user-service/user-service/permission"
 	rolepb "github.com/yasinsaee/go-user-service/user-service/role"
@@ -45,6 +49,7 @@ func StartGRPCServer() {
 	roleRepo := repository_role.NewMongoRoleRepository(mongo.DB.Database, "role")
 	userRepo := repository_user.NewMongoUserRepository(mongo.DB.Database, "user")
 	otpRepo := repository_otp.NewMongoOTPRepository(mongo.DB.Database, "otp")
+	gpRepo := repository_group.NewMongoGroupRepository(mongo.DB.Database, "group")
 
 	//providers
 	provider := providers.NewOTPProvider()
@@ -64,18 +69,24 @@ func StartGRPCServer() {
 	roleService := role.NewRoleService(roleRepo)
 	userService := user.NewUserService(userRepo, tokenStore)
 	otpService := otp.NewOTPService(otpRepo, provider, rateLimiter, otpConfig.TTL, otpConfig.RateLimit, otpConfig, otpConfig.MaxOTPPerReceiver)
+	gpService := group.NewGroupService(gpRepo)
+
+	//system boot
+	BootstrapSystem(userService, roleService, permissionService, gpService, "admin", "user_service")
 
 	//handlers
 	permissionHandler := permissiongrpc.New(permissionService)
 	roleHandler := rolegrpc.New(roleService, permissionService)
-	userHandler := usergrpc.New(userService, roleService, permissionService)
+	userHandler := usergrpc.New(userService, roleService, permissionService, gpService)
 	otpHandler := otpgrpc.New(otpService)
+	gpHandler := groupgrpc.New(gpService, roleService, permissionService)
 
 	//register grpc services
 	permissionpb.RegisterPermissionServiceServer(s, permissionHandler)
 	rolepb.RegisterRoleServiceServer(s, roleHandler)
 	userpb.RegisterUserServiceServer(s, userHandler)
 	otppb.RegisterOTPServiceServer(s, otpHandler)
+	grouppb.RegisterGroupServiceServer(s, gpHandler)
 
 	log.Println("gRPC server is running on port 50051")
 	if err := s.Serve(lis); err != nil {

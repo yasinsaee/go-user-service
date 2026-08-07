@@ -3,10 +3,11 @@ package rolegrpc
 import (
 	"context"
 
+	cContext "github.com/yasinsaee/go-user-service/internal/context"
+	"github.com/yasinsaee/go-user-service/internal/context/filter"
 	"github.com/yasinsaee/go-user-service/internal/domain/permission"
 	"github.com/yasinsaee/go-user-service/internal/domain/role"
 	rolepb "github.com/yasinsaee/go-user-service/user-service/role"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -24,13 +25,13 @@ func New(service role.RoleService, perService permission.PermissionService) *Han
 // -- start helper
 func toPermissionPB(p *permission.Permission) *rolepb.Permission {
 	return &rolepb.Permission{
-		Id:          p.ID.Hex(),
+		Id:          p.UniqueID,
 		Name:        p.Name,
 		Description: p.Description,
 	}
 }
 
-func (h *Handler) getPermissionsFromIDs(ids []primitive.ObjectID) ([]*rolepb.Permission, error) {
+func (h *Handler) getPermissionsFromIDs(ids []string) ([]*rolepb.Permission, error) {
 	var permProtos []*rolepb.Permission
 	for _, id := range ids {
 		p, err := h.perService.GetByID(id)
@@ -48,10 +49,12 @@ func (h *Handler) toRolePB(r *role.Role) (*rolepb.Role, error) {
 		return nil, err
 	}
 	return &rolepb.Role{
-		Id:          r.ID.Hex(),
+		Id:          r.UniqueID,
 		Name:        r.Name,
 		Description: r.Description,
+		Key:         r.Key,
 		Permissions: perms,
+		Scope:       r.Scope,
 	}, nil
 }
 
@@ -61,14 +64,12 @@ func (h *Handler) CreateRole(ctx context.Context, req *rolepb.CreateRoleRequest)
 	r := &role.Role{
 		Name:        req.GetName(),
 		Description: req.GetDescription(),
+		Key:         req.GetKey(),
+		Scope:       req.GetScope(),
 	}
 
 	for _, v := range req.GetPermissions() {
-		id, err := primitive.ObjectIDFromHex(v)
-		if err != nil {
-			return nil, status.Errorf(codes.InvalidArgument, "invalid permission id: %v", err)
-		}
-		r.Permissions = append(r.Permissions, id)
+		r.Permissions = append(r.Permissions, v)
 	}
 
 	err := h.service.Create(r)
@@ -87,12 +88,7 @@ func (h *Handler) CreateRole(ctx context.Context, req *rolepb.CreateRoleRequest)
 }
 
 func (h *Handler) UpdateRole(ctx context.Context, req *rolepb.UpdateRoleRequest) (*rolepb.UpdateRoleResponse, error) {
-	id, err := primitive.ObjectIDFromHex(req.GetId())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid id format")
-	}
-
-	rol, err := h.service.GetByID(id)
+	rol, err := h.service.GetByID(req.GetId())
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "role not found: %v", err)
 	}
@@ -103,14 +99,16 @@ func (h *Handler) UpdateRole(ctx context.Context, req *rolepb.UpdateRoleRequest)
 	if desc := req.GetDescription(); desc != "" {
 		rol.Description = desc
 	}
+	if ky := req.GetKey(); ky != "" {
+		rol.Key = ky
+	}
+	if sc := req.GetScope(); sc != "" {
+		rol.Scope = sc
+	}
 	if len(req.Permissions) > 0 {
-		rol.Permissions = make([]primitive.ObjectID, 0, len(req.Permissions))
+		rol.Permissions = make([]string, 0, len(req.Permissions))
 		for _, v := range req.GetPermissions() {
-			id, err := primitive.ObjectIDFromHex(v)
-			if err != nil {
-				return nil, status.Errorf(codes.InvalidArgument, "invalid permission id: %v", err)
-			}
-			rol.Permissions = append(rol.Permissions, id)
+			rol.Permissions = append(rol.Permissions, v)
 		}
 	}
 
@@ -127,12 +125,7 @@ func (h *Handler) UpdateRole(ctx context.Context, req *rolepb.UpdateRoleRequest)
 }
 
 func (h *Handler) GetRole(ctx context.Context, req *rolepb.GetRoleRequest) (*rolepb.GetRoleResponse, error) {
-	id, err := primitive.ObjectIDFromHex(req.GetId())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid id format")
-	}
-
-	r, err := h.service.GetByID(id)
+	r, err := h.service.GetByID(req.GetId())
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "role not found: %v", err)
 	}
@@ -170,4 +163,35 @@ func (h *Handler) DeleteRole(ctx context.Context, req *rolepb.DeleteRoleRequest)
 	}
 
 	return &rolepb.DeleteRoleResponse{Message: "ok"}, nil
+}
+
+func (h *Handler) ListPaginationRoles(ctx context.Context, req *rolepb.ListPaginationRolesRequest) (*rolepb.ListPaginationRolesResponse, error) {
+	var metaData = cContext.MetaData{
+		Limit:       int(req.GetLimit()),
+		Sort:        req.GetSort(),
+		CurrentPage: int(req.GetPage()),
+	}
+
+	metaDataRes, roles, err := h.service.PaginationList(metaData, role.RoleFilter{SearchFilter: filter.SearchFilter{Search: req.GetSearch()}, Scope: req.GetScope(), IsDelete: "false"})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list roles: %v", err)
+	}
+
+	var pbRoles []*rolepb.Role
+	for _, r := range roles {
+		rolePB, err := h.toRolePB(&r)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to map role: %v", err)
+		}
+		pbRoles = append(pbRoles, rolePB)
+	}
+
+	return &rolepb.ListPaginationRolesResponse{Roles: pbRoles, MetaData: &rolepb.MetaData{
+		Limit:       int32(metaDataRes.Limit),
+		TotalCounts: int32(metaDataRes.TotalCounts),
+		TotalPages:  int32(metaDataRes.TotalPages),
+		CurrentPage: int32(metaDataRes.CurrentPage),
+		NextPage:    int32(metaDataRes.NextPage),
+		Sort:        metaDataRes.Sort,
+	}}, nil
 }

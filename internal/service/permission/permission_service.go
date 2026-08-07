@@ -33,9 +33,20 @@ func (s *permissionServiceImpl) Update(permission *permission.Permission) error 
 }
 
 func (s *permissionServiceImpl) Delete(id any) error {
-	return s.repo.Delete(id)
+	return s.repo.SoftDelete(id)
 }
 
 func (s *permissionServiceImpl) ListAll() (permission.Permissions, error) {
 	return s.repo.List()
+}
+
+func (s *permissionServiceImpl) GetByIDs(ids []string) (permission.Permissions, error) {
+	if len(ids) == 0 {
+		return make(permission.Permissions, 0), nil
+	}
+	return s.repo.GetByIDs(ids)
+}
+
+func (s *permissionServiceImpl) GetByKey(key string) (*permission.Permission, error) {
+	return s.repo.FindOneByFilter(permission.PermissionFilter{Key: key, IsDelete: "false"})
 }

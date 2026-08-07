@@ -33,7 +33,7 @@ func (h *Handler) CreatePermission(ctx context.Context, req *permissionpb.Create
 
 	return &permissionpb.CreatePermissionResponse{
 		Permission: &permissionpb.Permission{
-			Id:          p.ID.Hex(),
+			Id:          p.UniqueID,
 			Name:        p.Name,
 			Description: p.Description,
 			Key:         p.Key,
@@ -42,12 +42,7 @@ func (h *Handler) CreatePermission(ctx context.Context, req *permissionpb.Create
 }
 
 func (h *Handler) UpdatePermission(ctx context.Context, req *permissionpb.UpdatePermissionRequest) (*permissionpb.UpdatePermissionResponse, error) {
-	id, err := primitive.ObjectIDFromHex(req.GetId())
-	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid id format")
-	}
-
-	per, err := h.service.GetByID(id)
+	per, err := h.service.GetByID(req.GetId())
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "permission not found: %v", err)
 	}
@@ -89,7 +84,7 @@ func (h *Handler) GetPermission(ctx context.Context, req *permissionpb.GetPermis
 
 	return &permissionpb.GetPermissionResponse{
 		Permission: &permissionpb.Permission{
-			Id:          p.ID.Hex(),
+			Id:          p.UniqueID,
 			Name:        p.Name,
 			Description: p.Description,
 			Key:         p.Key,
@@ -106,7 +101,7 @@ func (h *Handler) ListPermissions(ctx context.Context, req *permissionpb.ListPer
 	var pbPerms []*permissionpb.Permission
 	for _, p := range perms {
 		pbPerms = append(pbPerms, &permissionpb.Permission{
-			Id:          p.ID.Hex(),
+			Id:          p.UniqueID,
 			Name:        p.Name,
 			Description: p.Description,
 			Key:         p.Key,

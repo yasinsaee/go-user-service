@@ -1,5 +1,7 @@
 package user
 
+import "github.com/yasinsaee/go-user-service/internal/context"
+
 // UserService defines business logic operations related to users.
 type UserService interface {
 	Register(username string, user *User) error
@@ -11,6 +13,10 @@ type UserService interface {
 	ListAll() (Users, error)
 	ResetPassword(user *User, currentPassword, password, rePassword string) error
 	UpdatePassword(user *User, password, rePassword string) error
+	//totalCounts, totalPages,model,error
+	PaginationList(metaData context.MetaData, q UserFilter) (context.MetaData, Users, error)
+	Count(q UserFilter) (int, error)
+	BanUser(id string) (*User, error)
 
 	//refresh token methods redis-based
 	StoreRefreshToken(userID string, refreshToken string) error

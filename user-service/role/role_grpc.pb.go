@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RoleService_GetRole_FullMethodName    = "/role.RoleService/GetRole"
-	RoleService_CreateRole_FullMethodName = "/role.RoleService/CreateRole"
-	RoleService_ListRoles_FullMethodName  = "/role.RoleService/ListRoles"
-	RoleService_UpdateRole_FullMethodName = "/role.RoleService/UpdateRole"
-	RoleService_DeleteRole_FullMethodName = "/role.RoleService/DeleteRole"
+	RoleService_GetRole_FullMethodName             = "/role.RoleService/GetRole"
+	RoleService_CreateRole_FullMethodName          = "/role.RoleService/CreateRole"
+	RoleService_ListRoles_FullMethodName           = "/role.RoleService/ListRoles"
+	RoleService_UpdateRole_FullMethodName          = "/role.RoleService/UpdateRole"
+	RoleService_DeleteRole_FullMethodName          = "/role.RoleService/DeleteRole"
+	RoleService_ListPaginationRoles_FullMethodName = "/role.RoleService/ListPaginationRoles"
 )
 
 // RoleServiceClient is the client API for RoleService service.
@@ -35,6 +36,7 @@ type RoleServiceClient interface {
 	ListRoles(ctx context.Context, in *ListRoleRequest, opts ...grpc.CallOption) (*ListRoleResponse, error)
 	UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*UpdateRoleResponse, error)
 	DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*DeleteRoleResponse, error)
+	ListPaginationRoles(ctx context.Context, in *ListPaginationRolesRequest, opts ...grpc.CallOption) (*ListPaginationRolesResponse, error)
 }
 
 type roleServiceClient struct {
@@ -95,6 +97,16 @@ func (c *roleServiceClient) DeleteRole(ctx context.Context, in *DeleteRoleReques
 	return out, nil
 }
 
+func (c *roleServiceClient) ListPaginationRoles(ctx context.Context, in *ListPaginationRolesRequest, opts ...grpc.CallOption) (*ListPaginationRolesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPaginationRolesResponse)
+	err := c.cc.Invoke(ctx, RoleService_ListPaginationRoles_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RoleServiceServer is the server API for RoleService service.
 // All implementations must embed UnimplementedRoleServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type RoleServiceServer interface {
 	ListRoles(context.Context, *ListRoleRequest) (*ListRoleResponse, error)
 	UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error)
 	DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error)
+	ListPaginationRoles(context.Context, *ListPaginationRolesRequest) (*ListPaginationRolesResponse, error)
 	mustEmbedUnimplementedRoleServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedRoleServiceServer) UpdateRole(context.Context, *UpdateRoleReq
 }
 func (UnimplementedRoleServiceServer) DeleteRole(context.Context, *DeleteRoleRequest) (*DeleteRoleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteRole not implemented")
+}
+func (UnimplementedRoleServiceServer) ListPaginationRoles(context.Context, *ListPaginationRolesRequest) (*ListPaginationRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPaginationRoles not implemented")
 }
 func (UnimplementedRoleServiceServer) mustEmbedUnimplementedRoleServiceServer() {}
 func (UnimplementedRoleServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +256,24 @@ func _RoleService_DeleteRole_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RoleService_ListPaginationRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPaginationRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoleServiceServer).ListPaginationRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoleService_ListPaginationRoles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoleServiceServer).ListPaginationRoles(ctx, req.(*ListPaginationRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RoleService_ServiceDesc is the grpc.ServiceDesc for RoleService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var RoleService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteRole",
 			Handler:    _RoleService_DeleteRole_Handler,
+		},
+		{
+			MethodName: "ListPaginationRoles",
+			Handler:    _RoleService_ListPaginationRoles_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

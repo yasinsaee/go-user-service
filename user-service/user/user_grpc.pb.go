@@ -19,13 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_Login_FullMethodName          = "/user.UserService/Login"
-	UserService_Register_FullMethodName       = "/user.UserService/Register"
-	UserService_Update_FullMethodName         = "/user.UserService/Update"
-	UserService_ResetPassword_FullMethodName  = "/user.UserService/ResetPassword"
-	UserService_UpdatePassword_FullMethodName = "/user.UserService/UpdatePassword"
-	UserService_RefreshToken_FullMethodName   = "/user.UserService/RefreshToken"
-	UserService_Logout_FullMethodName         = "/user.UserService/Logout"
+	UserService_Login_FullMethodName               = "/user.UserService/Login"
+	UserService_Register_FullMethodName            = "/user.UserService/Register"
+	UserService_Update_FullMethodName              = "/user.UserService/Update"
+	UserService_ResetPassword_FullMethodName       = "/user.UserService/ResetPassword"
+	UserService_UpdatePassword_FullMethodName      = "/user.UserService/UpdatePassword"
+	UserService_RefreshToken_FullMethodName        = "/user.UserService/RefreshToken"
+	UserService_Logout_FullMethodName              = "/user.UserService/Logout"
+	UserService_ListPaginationUsers_FullMethodName = "/user.UserService/ListPaginationUsers"
+	UserService_BanUser_FullMethodName             = "/user.UserService/BanUser"
+	UserService_GetUser_FullMethodName             = "/user.UserService/GetUser"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -39,6 +42,9 @@ type UserServiceClient interface {
 	UpdatePassword(ctx context.Context, in *UpdatePasswordUser, opts ...grpc.CallOption) (*UserResponse, error)
 	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 	Logout(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	ListPaginationUsers(ctx context.Context, in *ListPaginationUsersRequest, opts ...grpc.CallOption) (*ListPaginationUsersResponse, error)
+	BanUser(ctx context.Context, in *BanUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 }
 
 type userServiceClient struct {
@@ -119,6 +125,36 @@ func (c *userServiceClient) Logout(ctx context.Context, in *RefreshTokenRequest,
 	return out, nil
 }
 
+func (c *userServiceClient) ListPaginationUsers(ctx context.Context, in *ListPaginationUsersRequest, opts ...grpc.CallOption) (*ListPaginationUsersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPaginationUsersResponse)
+	err := c.cc.Invoke(ctx, UserService_ListPaginationUsers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) BanUser(ctx context.Context, in *BanUserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, UserService_BanUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -130,6 +166,9 @@ type UserServiceServer interface {
 	UpdatePassword(context.Context, *UpdatePasswordUser) (*UserResponse, error)
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
 	Logout(context.Context, *RefreshTokenRequest) (*LogoutResponse, error)
+	ListPaginationUsers(context.Context, *ListPaginationUsersRequest) (*ListPaginationUsersResponse, error)
+	BanUser(context.Context, *BanUserRequest) (*UserResponse, error)
+	GetUser(context.Context, *GetUserRequest) (*UserResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -160,6 +199,15 @@ func (UnimplementedUserServiceServer) RefreshToken(context.Context, *RefreshToke
 }
 func (UnimplementedUserServiceServer) Logout(context.Context, *RefreshTokenRequest) (*LogoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedUserServiceServer) ListPaginationUsers(context.Context, *ListPaginationUsersRequest) (*ListPaginationUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPaginationUsers not implemented")
+}
+func (UnimplementedUserServiceServer) BanUser(context.Context, *BanUserRequest) (*UserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BanUser not implemented")
+}
+func (UnimplementedUserServiceServer) GetUser(context.Context, *GetUserRequest) (*UserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -308,6 +356,60 @@ func _UserService_Logout_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_ListPaginationUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPaginationUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).ListPaginationUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_ListPaginationUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).ListPaginationUsers(ctx, req.(*ListPaginationUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_BanUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BanUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).BanUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_BanUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).BanUser(ctx, req.(*BanUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUser(ctx, req.(*GetUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +444,18 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Logout",
 			Handler:    _UserService_Logout_Handler,
+		},
+		{
+			MethodName: "ListPaginationUsers",
+			Handler:    _UserService_ListPaginationUsers_Handler,
+		},
+		{
+			MethodName: "BanUser",
+			Handler:    _UserService_BanUser_Handler,
+		},
+		{
+			MethodName: "GetUser",
+			Handler:    _UserService_GetUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -7,19 +7,25 @@ import (
 )
 
 type User struct {
-	ID           primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
-	Roles        []primitive.ObjectID `bson:"roles" json:"roles"`
-	FirstName    string               `bson:"first_name" json:"first_name"`
-	LastName     string               `bson:"last_name" json:"last_name"`
-	ProfileImage string               `bson:"profile_image,omitempty" json:"profile_image,omitempty"`
-	Username     string               `bson:"username" json:"username"`
-	Email        string               `bson:"email" json:"email"`
-	Password     string               `bson:"password" json:"-"`
-	PhoneNumber  string               `bson:"phone_number" json:"phone_number"`
-	IsActive     bool                 `bson:"is_active" json:"is_active"`
-	CreatedAt    time.Time            `bson:"created_at" json:"created_at"`
-	UpdatedAt    time.Time            `bson:"updated_at" json:"updated_at"`
-	LastLogin    time.Time            `bson:"last_login,omitempty" json:"last_login,omitempty"`
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	UniqueID     string             `bson:"unique_id"`
+	TenantID     string             `bson:"tenant_id"` //can be null - Organization or Store ID for multi-tenancy
+	FirstName    string             `bson:"first_name"`
+	LastName     string             `bson:"last_name"`
+	ProfileImage string             `bson:"profile_image,omitempty"`
+	Username     string             `bson:"username"`
+	Email        string             `bson:"email"`
+	Password     string             `bson:"password"`
+	PhoneNumber  string             `bson:"phone_number"`
+	Group        string             `bson:"group"`
+	IsActive     bool               `bson:"is_active"`
+	IsBanned     bool               `bson:"is_banned"`
+	IsDeleted    bool               `bson:"is_deleted"`
+	BannedAt     time.Time          `bson:"banned_at"`
+	DeletedAt    time.Time          `bson:"deleted_at"`
+	CreatedAt    time.Time          `bson:"created_at"`
+	UpdatedAt    time.Time          `bson:"updated_at"`
+	LastLogin    time.Time          `bson:"last_login,omitempty"`
 }
 
 type Users []User

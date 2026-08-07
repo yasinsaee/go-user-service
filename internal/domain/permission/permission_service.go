@@ -7,4 +7,6 @@ type PermissionService interface {
 	Update(permission *Permission) error
 	Delete(id any) error
 	ListAll() (Permissions, error)
+	GetByIDs(ids []string) (Permissions, error)
+	GetByKey(key string) (*Permission, error)
 }

@@ -85,8 +85,10 @@ type Role struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Permissions   []*Permission          `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Key           string                 `protobuf:"bytes,3,opt,name=key,proto3" json:"key,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Permissions   []*Permission          `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Scope         string                 `protobuf:"bytes,6,opt,name=scope,proto3" json:"scope,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -135,6 +137,13 @@ func (x *Role) GetName() string {
 	return ""
 }
 
+func (x *Role) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
 func (x *Role) GetDescription() string {
 	if x != nil {
 		return x.Description
@@ -147,6 +156,13 @@ func (x *Role) GetPermissions() []*Permission {
 		return x.Permissions
 	}
 	return nil
+}
+
+func (x *Role) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
 }
 
 type GetRoleRequest struct {
@@ -241,7 +257,9 @@ type CreateRoleRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Permissions   []string               `protobuf:"bytes,3,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Key           string                 `protobuf:"bytes,3,opt,name=key,proto3" json:"key,omitempty"`
+	Permissions   []string               `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Scope         string                 `protobuf:"bytes,5,opt,name=scope,proto3" json:"scope,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -290,11 +308,25 @@ func (x *CreateRoleRequest) GetDescription() string {
 	return ""
 }
 
+func (x *CreateRoleRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
 func (x *CreateRoleRequest) GetPermissions() []string {
 	if x != nil {
 		return x.Permissions
 	}
 	return nil
+}
+
+func (x *CreateRoleRequest) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
 }
 
 type CreateRoleResponse struct {
@@ -346,7 +378,9 @@ type UpdateRoleRequest struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Permissions   []string               `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Key           string                 `protobuf:"bytes,4,opt,name=key,proto3" json:"key,omitempty"`
+	Permissions   []string               `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Scope         string                 `protobuf:"bytes,6,opt,name=scope,proto3" json:"scope,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -402,11 +436,25 @@ func (x *UpdateRoleRequest) GetDescription() string {
 	return ""
 }
 
+func (x *UpdateRoleRequest) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
 func (x *UpdateRoleRequest) GetPermissions() []string {
 	if x != nil {
 		return x.Permissions
 	}
 	return nil
+}
+
+func (x *UpdateRoleRequest) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
 }
 
 type UpdateRoleResponse struct {
@@ -621,6 +669,218 @@ func (x *ListRoleResponse) GetRoles() []*Role {
 	return nil
 }
 
+type ListPaginationRolesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	Sort          string                 `protobuf:"bytes,3,opt,name=sort,proto3" json:"sort,omitempty"`
+	Search        string                 `protobuf:"bytes,4,opt,name=search,proto3" json:"search,omitempty"`
+	Scope         string                 `protobuf:"bytes,5,opt,name=scope,proto3" json:"scope,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPaginationRolesRequest) Reset() {
+	*x = ListPaginationRolesRequest{}
+	mi := &file_user_service_role_role_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPaginationRolesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPaginationRolesRequest) ProtoMessage() {}
+
+func (x *ListPaginationRolesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_role_role_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPaginationRolesRequest.ProtoReflect.Descriptor instead.
+func (*ListPaginationRolesRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_role_role_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListPaginationRolesRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListPaginationRolesRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListPaginationRolesRequest) GetSort() string {
+	if x != nil {
+		return x.Sort
+	}
+	return ""
+}
+
+func (x *ListPaginationRolesRequest) GetSearch() string {
+	if x != nil {
+		return x.Search
+	}
+	return ""
+}
+
+func (x *ListPaginationRolesRequest) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
+}
+
+type ListPaginationRolesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Roles         []*Role                `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
+	MetaData      *MetaData              `protobuf:"bytes,2,opt,name=metaData,proto3" json:"metaData,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPaginationRolesResponse) Reset() {
+	*x = ListPaginationRolesResponse{}
+	mi := &file_user_service_role_role_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPaginationRolesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPaginationRolesResponse) ProtoMessage() {}
+
+func (x *ListPaginationRolesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_role_role_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPaginationRolesResponse.ProtoReflect.Descriptor instead.
+func (*ListPaginationRolesResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_role_role_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListPaginationRolesResponse) GetRoles() []*Role {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
+func (x *ListPaginationRolesResponse) GetMetaData() *MetaData {
+	if x != nil {
+		return x.MetaData
+	}
+	return nil
+}
+
+type MetaData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	TotalCounts   int32                  `protobuf:"varint,2,opt,name=totalCounts,proto3" json:"totalCounts,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,3,opt,name=totalPages,proto3" json:"totalPages,omitempty"`
+	CurrentPage   int32                  `protobuf:"varint,4,opt,name=currentPage,proto3" json:"currentPage,omitempty"`
+	NextPage      int32                  `protobuf:"varint,5,opt,name=nextPage,proto3" json:"nextPage,omitempty"`
+	Sort          string                 `protobuf:"bytes,6,opt,name=sort,proto3" json:"sort,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MetaData) Reset() {
+	*x = MetaData{}
+	mi := &file_user_service_role_role_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MetaData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MetaData) ProtoMessage() {}
+
+func (x *MetaData) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_role_role_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MetaData.ProtoReflect.Descriptor instead.
+func (*MetaData) Descriptor() ([]byte, []int) {
+	return file_user_service_role_role_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *MetaData) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *MetaData) GetTotalCounts() int32 {
+	if x != nil {
+		return x.TotalCounts
+	}
+	return 0
+}
+
+func (x *MetaData) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
+}
+
+func (x *MetaData) GetCurrentPage() int32 {
+	if x != nil {
+		return x.CurrentPage
+	}
+	return 0
+}
+
+func (x *MetaData) GetNextPage() int32 {
+	if x != nil {
+		return x.NextPage
+	}
+	return 0
+}
+
+func (x *MetaData) GetSort() string {
+	if x != nil {
+		return x.Sort
+	}
+	return ""
+}
+
 var File_user_service_role_role_proto protoreflect.FileDescriptor
 
 const file_user_service_role_role_proto_rawDesc = "" +
@@ -630,29 +890,35 @@ const file_user_service_role_role_proto_rawDesc = "" +
 	"Permission\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"\x80\x01\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"\xa8\x01\n" +
 	"\x04Role\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x122\n" +
-	"\vpermissions\x18\x04 \x03(\v2\x10.role.PermissionR\vpermissions\" \n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
+	"\x03key\x18\x03 \x01(\tR\x03key\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x122\n" +
+	"\vpermissions\x18\x05 \x03(\v2\x10.role.PermissionR\vpermissions\x12\x14\n" +
+	"\x05scope\x18\x06 \x01(\tR\x05scope\" \n" +
 	"\x0eGetRoleRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"1\n" +
 	"\x0fGetRoleResponse\x12\x1e\n" +
 	"\x04role\x18\x01 \x01(\v2\n" +
-	".role.RoleR\x04role\"k\n" +
+	".role.RoleR\x04role\"\x93\x01\n" +
 	"\x11CreateRoleRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12 \n" +
-	"\vpermissions\x18\x03 \x03(\tR\vpermissions\"4\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
+	"\x03key\x18\x03 \x01(\tR\x03key\x12 \n" +
+	"\vpermissions\x18\x04 \x03(\tR\vpermissions\x12\x14\n" +
+	"\x05scope\x18\x05 \x01(\tR\x05scope\"4\n" +
 	"\x12CreateRoleResponse\x12\x1e\n" +
 	"\x04role\x18\x01 \x01(\v2\n" +
-	".role.RoleR\x04role\"{\n" +
+	".role.RoleR\x04role\"\xa3\x01\n" +
 	"\x11UpdateRoleRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12 \n" +
-	"\vpermissions\x18\x04 \x03(\tR\vpermissions\"4\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x10\n" +
+	"\x03key\x18\x04 \x01(\tR\x03key\x12 \n" +
+	"\vpermissions\x18\x05 \x03(\tR\vpermissions\x12\x14\n" +
+	"\x05scope\x18\x06 \x01(\tR\x05scope\"4\n" +
 	"\x12UpdateRoleResponse\x12\x1e\n" +
 	"\x04role\x18\x01 \x01(\v2\n" +
 	".role.RoleR\x04role\"#\n" +
@@ -663,7 +929,26 @@ const file_user_service_role_role_proto_rawDesc = "" +
 	"\x0fListRoleRequest\"4\n" +
 	"\x10ListRoleResponse\x12 \n" +
 	"\x05roles\x18\x01 \x03(\v2\n" +
-	".role.RoleR\x05roles2\xc4\x02\n" +
+	".role.RoleR\x05roles\"\x88\x01\n" +
+	"\x1aListPaginationRolesRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x12\n" +
+	"\x04sort\x18\x03 \x01(\tR\x04sort\x12\x16\n" +
+	"\x06search\x18\x04 \x01(\tR\x06search\x12\x14\n" +
+	"\x05scope\x18\x05 \x01(\tR\x05scope\"k\n" +
+	"\x1bListPaginationRolesResponse\x12 \n" +
+	"\x05roles\x18\x01 \x03(\v2\n" +
+	".role.RoleR\x05roles\x12*\n" +
+	"\bmetaData\x18\x02 \x01(\v2\x0e.role.MetaDataR\bmetaData\"\xb4\x01\n" +
+	"\bMetaData\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12 \n" +
+	"\vtotalCounts\x18\x02 \x01(\x05R\vtotalCounts\x12\x1e\n" +
+	"\n" +
+	"totalPages\x18\x03 \x01(\x05R\n" +
+	"totalPages\x12 \n" +
+	"\vcurrentPage\x18\x04 \x01(\x05R\vcurrentPage\x12\x1a\n" +
+	"\bnextPage\x18\x05 \x01(\x05R\bnextPage\x12\x12\n" +
+	"\x04sort\x18\x06 \x01(\tR\x04sort2\xa0\x03\n" +
 	"\vRoleService\x126\n" +
 	"\aGetRole\x12\x14.role.GetRoleRequest\x1a\x15.role.GetRoleResponse\x12?\n" +
 	"\n" +
@@ -672,7 +957,8 @@ const file_user_service_role_role_proto_rawDesc = "" +
 	"\n" +
 	"UpdateRole\x12\x17.role.UpdateRoleRequest\x1a\x18.role.UpdateRoleResponse\x12?\n" +
 	"\n" +
-	"DeleteRole\x12\x17.role.DeleteRoleRequest\x1a\x18.role.DeleteRoleResponseB\tZ\a/rolepbb\x06proto3"
+	"DeleteRole\x12\x17.role.DeleteRoleRequest\x1a\x18.role.DeleteRoleResponse\x12Z\n" +
+	"\x13ListPaginationRoles\x12 .role.ListPaginationRolesRequest\x1a!.role.ListPaginationRolesResponseB\tZ\a/rolepbb\x06proto3"
 
 var (
 	file_user_service_role_role_proto_rawDescOnce sync.Once
@@ -686,20 +972,23 @@ func file_user_service_role_role_proto_rawDescGZIP() []byte {
 	return file_user_service_role_role_proto_rawDescData
 }
 
-var file_user_service_role_role_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_user_service_role_role_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_user_service_role_role_proto_goTypes = []any{
-	(*Permission)(nil),         // 0: role.Permission
-	(*Role)(nil),               // 1: role.Role
-	(*GetRoleRequest)(nil),     // 2: role.GetRoleRequest
-	(*GetRoleResponse)(nil),    // 3: role.GetRoleResponse
-	(*CreateRoleRequest)(nil),  // 4: role.CreateRoleRequest
-	(*CreateRoleResponse)(nil), // 5: role.CreateRoleResponse
-	(*UpdateRoleRequest)(nil),  // 6: role.UpdateRoleRequest
-	(*UpdateRoleResponse)(nil), // 7: role.UpdateRoleResponse
-	(*DeleteRoleRequest)(nil),  // 8: role.DeleteRoleRequest
-	(*DeleteRoleResponse)(nil), // 9: role.DeleteRoleResponse
-	(*ListRoleRequest)(nil),    // 10: role.ListRoleRequest
-	(*ListRoleResponse)(nil),   // 11: role.ListRoleResponse
+	(*Permission)(nil),                  // 0: role.Permission
+	(*Role)(nil),                        // 1: role.Role
+	(*GetRoleRequest)(nil),              // 2: role.GetRoleRequest
+	(*GetRoleResponse)(nil),             // 3: role.GetRoleResponse
+	(*CreateRoleRequest)(nil),           // 4: role.CreateRoleRequest
+	(*CreateRoleResponse)(nil),          // 5: role.CreateRoleResponse
+	(*UpdateRoleRequest)(nil),           // 6: role.UpdateRoleRequest
+	(*UpdateRoleResponse)(nil),          // 7: role.UpdateRoleResponse
+	(*DeleteRoleRequest)(nil),           // 8: role.DeleteRoleRequest
+	(*DeleteRoleResponse)(nil),          // 9: role.DeleteRoleResponse
+	(*ListRoleRequest)(nil),             // 10: role.ListRoleRequest
+	(*ListRoleResponse)(nil),            // 11: role.ListRoleResponse
+	(*ListPaginationRolesRequest)(nil),  // 12: role.ListPaginationRolesRequest
+	(*ListPaginationRolesResponse)(nil), // 13: role.ListPaginationRolesResponse
+	(*MetaData)(nil),                    // 14: role.MetaData
 }
 var file_user_service_role_role_proto_depIdxs = []int32{
 	0,  // 0: role.Role.permissions:type_name -> role.Permission
@@ -707,21 +996,25 @@ var file_user_service_role_role_proto_depIdxs = []int32{
 	1,  // 2: role.CreateRoleResponse.role:type_name -> role.Role
 	1,  // 3: role.UpdateRoleResponse.role:type_name -> role.Role
 	1,  // 4: role.ListRoleResponse.roles:type_name -> role.Role
-	2,  // 5: role.RoleService.GetRole:input_type -> role.GetRoleRequest
-	4,  // 6: role.RoleService.CreateRole:input_type -> role.CreateRoleRequest
-	10, // 7: role.RoleService.ListRoles:input_type -> role.ListRoleRequest
-	6,  // 8: role.RoleService.UpdateRole:input_type -> role.UpdateRoleRequest
-	8,  // 9: role.RoleService.DeleteRole:input_type -> role.DeleteRoleRequest
-	3,  // 10: role.RoleService.GetRole:output_type -> role.GetRoleResponse
-	5,  // 11: role.RoleService.CreateRole:output_type -> role.CreateRoleResponse
-	11, // 12: role.RoleService.ListRoles:output_type -> role.ListRoleResponse
-	7,  // 13: role.RoleService.UpdateRole:output_type -> role.UpdateRoleResponse
-	9,  // 14: role.RoleService.DeleteRole:output_type -> role.DeleteRoleResponse
-	10, // [10:15] is the sub-list for method output_type
-	5,  // [5:10] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	1,  // 5: role.ListPaginationRolesResponse.roles:type_name -> role.Role
+	14, // 6: role.ListPaginationRolesResponse.metaData:type_name -> role.MetaData
+	2,  // 7: role.RoleService.GetRole:input_type -> role.GetRoleRequest
+	4,  // 8: role.RoleService.CreateRole:input_type -> role.CreateRoleRequest
+	10, // 9: role.RoleService.ListRoles:input_type -> role.ListRoleRequest
+	6,  // 10: role.RoleService.UpdateRole:input_type -> role.UpdateRoleRequest
+	8,  // 11: role.RoleService.DeleteRole:input_type -> role.DeleteRoleRequest
+	12, // 12: role.RoleService.ListPaginationRoles:input_type -> role.ListPaginationRolesRequest
+	3,  // 13: role.RoleService.GetRole:output_type -> role.GetRoleResponse
+	5,  // 14: role.RoleService.CreateRole:output_type -> role.CreateRoleResponse
+	11, // 15: role.RoleService.ListRoles:output_type -> role.ListRoleResponse
+	7,  // 16: role.RoleService.UpdateRole:output_type -> role.UpdateRoleResponse
+	9,  // 17: role.RoleService.DeleteRole:output_type -> role.DeleteRoleResponse
+	13, // 18: role.RoleService.ListPaginationRoles:output_type -> role.ListPaginationRolesResponse
+	13, // [13:19] is the sub-list for method output_type
+	7,  // [7:13] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_user_service_role_role_proto_init() }
@@ -735,7 +1028,7 @@ func file_user_service_role_role_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_role_role_proto_rawDesc), len(file_user_service_role_role_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

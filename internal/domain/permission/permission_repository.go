@@ -7,4 +7,7 @@ type PermissionRepository interface {
 	Update(permission *Permission) error
 	Delete(id any) error
 	List() (Permissions, error)
+	SoftDelete(id any) error
+	GetByIDs(ids []string) (Permissions, error)
+	FindOneByFilter(filter PermissionFilter) (*Permission, error)
 }

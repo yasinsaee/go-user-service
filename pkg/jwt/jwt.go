@@ -26,11 +26,10 @@ var (
 type (
 	// JWTClaims is a struct that will be encoded to a JWT.
 	JWTClaims struct {
-		ID       string    `json:"id"`
-		Username string    `json:"username"`
-		Roles    []string  `json:"roles"`
-		Access   []string  `json:"access"`
-		Type     TokenType `json:"type"`
+		ID           string       `json:"id"`
+		Username     string       `json:"username"`
+		UserAccesses UserAccesses `json:"user_accesses"`
+		Type         TokenType    `json:"type"`
 		jwt.StandardClaims
 	}
 
@@ -42,10 +41,14 @@ type (
 	}
 
 	TokenConfig struct {
-		ID       string   `json:"id"`
-		Username string   `json:"username"`
-		Roles    []string `json:"roles"`
-		Access   []string `json:"access"`
+		ID           string       `json:"id"`
+		Username     string       `json:"username"`
+		UserAccesses UserAccesses `json:"user_accesses"`
+	}
+
+	UserAccess struct {
+		RoleKey  string   `json:"role_key"`
+		Accesses []string `json:"accesses"`
 	}
 
 	RefreshClaims struct {
@@ -54,6 +57,8 @@ type (
 		Type     TokenType `json:"type"`
 		jwt.StandardClaims
 	}
+
+	UserAccesses []UserAccess
 )
 
 type Model interface {
@@ -68,11 +73,10 @@ func (t *TokenConfig) GenerateAccessToken() (string, time.Time, error) {
 	exp := time.Now().UTC().Add(time.Hour * time.Duration(conf.AccessTokenExp))
 
 	claims := &JWTClaims{
-		ID:       t.ID,
-		Username: t.Username,
-		Roles:    t.Roles,
-		Access:   t.Access,
-		Type:     TokenTypeAccess,
+		ID:           t.ID,
+		Username:     t.Username,
+		UserAccesses: t.UserAccesses,
+		Type:         TokenTypeAccess,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: exp.Unix(),
 		},
@@ -82,7 +86,7 @@ func (t *TokenConfig) GenerateAccessToken() (string, time.Time, error) {
 }
 
 func (t *TokenConfig) GenerateRefreshToken() (string, time.Time, error) {
-	exp := time.Now().UTC().Add(time.Hour * 24 * time.Duration(conf.RefreshTokenExp	))
+	exp := time.Now().UTC().Add(time.Hour * 24 * time.Duration(conf.RefreshTokenExp))
 	claims := &RefreshClaims{
 		ID:       t.ID,
 		Username: t.Username,
@@ -115,54 +119,6 @@ func signToken(claims jwt.Claims) (string, time.Time, error) {
 	default:
 		return signed, time.Time{}, nil
 	}
-}
-
-func (t *TokenConfig) generateToken(expirationTime time.Time, privateKey []byte) (string, time.Time, error) {
-	claims := &JWTClaims{
-		ID:       t.ID,
-		Username: t.Username,
-		Roles:    t.Roles,
-		Access:   t.Access,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
-
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(privateKey)
-	if err != nil {
-		return "", time.Now().UTC(), err
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	tokenString, err := token.SignedString(key)
-	if err != nil {
-		return "", time.Now().UTC(), err
-	}
-
-	return tokenString, expirationTime, nil
-}
-
-func (t *TokenConfig) generateRefreshToken(expirationTime time.Time, privateKey []byte) (string, time.Time, error) {
-	claims := &RefreshClaims{
-		ID:       t.ID,
-		Username: t.Username,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
-
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(privateKey)
-	if err != nil {
-		return "", time.Now().UTC(), err
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	tokenString, err := token.SignedString(key)
-	if err != nil {
-		return "", time.Now().UTC(), err
-	}
-
-	return tokenString, expirationTime, nil
 }
 
 func CurrentToken(c *echo.Context) (*JWTClaims, error) {
