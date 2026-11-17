@@ -22,13 +22,17 @@ func NewOTPProvider() otp.OTPProvider {
 	case "SMSIR":
 		apiKey := config.GetEnv("SMSIR_API_KEY", "")
 		senderStr := config.GetEnv("SMSIR_SENDER", "")
+		message := config.GetEnv(
+			"SMSIR_MESSAGE",
+			"به یوزر سرویس خوش اومدی! 🌿\nخوشحالیم که کنار مایی.\nکد تایید ورود شما: {{code}}\nاین کد رو در اختیار دیگران قرار نده.",
+		)
 
 		sender, err := strconv.Atoi(senderStr)
 		if err != nil {
 			return nil
 		}
 
-		return NewSMSProviderSmsIR(apiKey, sender)
+		return NewSMSProviderSmsIR(apiKey, sender, message)
 	}
 
 	return nil
