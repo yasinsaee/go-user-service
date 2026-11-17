@@ -1,6 +1,8 @@
 package providers
 
 import (
+	"strconv"
+
 	"github.com/yasinsaee/go-user-service/internal/app/config"
 	"github.com/yasinsaee/go-user-service/internal/domain/otp"
 )
@@ -15,11 +17,19 @@ func NewOTPProvider() otp.OTPProvider {
 		return NewSMSProviderKavenegar(apiKey, sender)
 
 	case "SMTP":
-		// host := config.GetEnv("SMTP_HOST", "")
-		// port := config.GetEnv("SMTP_PORT", "587")
-		// user := config.GetEnv("SMTP_USER", "")
-		// pass := config.GetEnv("SMTP_PASS", "")
-		// return NewEmailProvider(host, port, user, pass)
+		// SMTP provider
+
+	case "SMSIR":
+		apiKey := config.GetEnv("SMSIR_API_KEY", "")
+		senderStr := config.GetEnv("SMSIR_SENDER", "")
+
+		sender, err := strconv.Atoi(senderStr)
+		if err != nil {
+			return nil
+		}
+
+		return NewSMSProviderSmsIR(apiKey, sender)
 	}
+
 	return nil
 }
